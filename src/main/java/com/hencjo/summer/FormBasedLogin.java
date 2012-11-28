@@ -14,20 +14,20 @@ public class FormBasedLogin {
 	private final String logoutUrl;
 	private final String usernameParameter;
 	private final String passwordParameter;
-	private final String loggedOutUrl;
-	private final String loginFailureUrl;
-	private final Responder onSuccess;
+	private final Responder loggedOut;
+	private final Responder loginFailure;
+	private final Responder loginSuccess;
 	
-	public FormBasedLogin(Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, String loggedOutUrl, String loginFailureUrl, Responder onSuccess) {
+	public FormBasedLogin(Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
 		this.authenticator = authenticator;
 		this.sessionWriter = sessionWriter;
 		this.loginUrl = loginUrl;
 		this.logoutUrl = logoutUrl;
 		this.usernameParameter = usernameParameter;
 		this.passwordParameter = passwordParameter;
-		this.loggedOutUrl = loggedOutUrl;
-		this.loginFailureUrl = loginFailureUrl;
-		this.onSuccess = onSuccess;
+		this.loggedOut = loggedOut;
+		this.loginFailure = loginFailure;
+		this.loginSuccess = loginSuccess;
 	}
 	
 	public RequestMatcher loginRequest() {
@@ -66,20 +66,19 @@ public class FormBasedLogin {
 				String password = request.getParameter(passwordParameter);
 
 				if (username == null || password == null) {
-					response.sendRedirect(request.getContextPath() + loginFailureUrl);
+					loginFailure.respond(request, response);
 					return ContinueOrRespond.STOP;
 				}
 
 				System.out.println("Check credentials: " + username + "/" + password);
 				if (!authenticator.authenticate(username, password)) {
-					response.sendRedirect(request.getContextPath() + loginFailureUrl);
+					loginFailure.respond(request, response);
 					return ContinueOrRespond.STOP;
 				}
 
 				SummerContextImpl.setAuthenticatedAs(username);
 				sessionWriter.startSession(request, response, username);
-				onSuccess.respond(request, response);
-//				response.sendRedirect(request.getContextPath() + loginSuccessUrl);
+				loginSuccess.respond(request, response);
 				System.out.println("Credentials check out!");
 				return ContinueOrRespond.STOP;
 			}
@@ -98,7 +97,7 @@ public class FormBasedLogin {
 			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				System.out.println("Logout");
 				sessionWriter.stopSession(request, response);
-				response.sendRedirect(request.getContextPath() + loggedOutUrl);
+				loggedOut.respond(request, response);
 				return ContinueOrRespond.STOP;
 			}
 
