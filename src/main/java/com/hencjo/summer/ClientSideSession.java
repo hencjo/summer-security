@@ -67,11 +67,11 @@ public class ClientSideSession {
 	
 	
 
-	public SessionWriter sessionWriter() {
+	public SessionWriter sessionWriter(final int expiresInSeconds) {
 		return new SessionWriter() {
 			@Override
 			public void startSession(HttpServletRequest request, HttpServletResponse response, String username) {
-				response.addHeader("Set-Cookie", cookies.setCookie(System.currentTimeMillis(), sessionCookie, request.getContextPath(), base64.encode(encryption.encode(username.getBytes(Charsets.utf8))), 3600));
+				response.addHeader("Set-Cookie", cookies.setCookie(System.currentTimeMillis(), sessionCookie, request.getContextPath(), base64.encode(encryption.encode(username.getBytes(Charsets.utf8))), expiresInSeconds));
 			}
 			
 			@Override
