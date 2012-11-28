@@ -12,6 +12,6 @@ public final class RuleAuthorizer {
 	}
 
 	public String describer() {
-		return rule.describer() + " => " + authorizer.describer();
+		return rule.describer() + ".then(" + authorizer.describer() + ")";
 	}
 }
