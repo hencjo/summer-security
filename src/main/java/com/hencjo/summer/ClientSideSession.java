@@ -22,7 +22,7 @@ public class ClientSideSession {
 		this.sessionCookie = sessionCookie;
 	}
 	
-	public String hasClientSideSession(HttpServletRequest request) {
+	private String hasClientSideSession(HttpServletRequest request) {
 		List<Cookie> cs = cookiesWithName(request, sessionCookie);
 		if (cs.isEmpty()) return null;
 		for (Cookie c : cs) {
