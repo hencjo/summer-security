@@ -16,10 +16,9 @@ public class FormBasedLogin {
 	private final String passwordParameter;
 	private final String loggedOutUrl;
 	private final String loginFailureUrl;
-	private final String loginSuccessUrl;
-
+	private final Responder onSuccess;
 	
-	public FormBasedLogin(Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, String loggedOutUrl, String loginFailureUrl, String loginSuccessUrl) {
+	public FormBasedLogin(Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, String loggedOutUrl, String loginFailureUrl, Responder onSuccess) {
 		this.authenticator = authenticator;
 		this.sessionWriter = sessionWriter;
 		this.loginUrl = loginUrl;
@@ -28,7 +27,7 @@ public class FormBasedLogin {
 		this.passwordParameter = passwordParameter;
 		this.loggedOutUrl = loggedOutUrl;
 		this.loginFailureUrl = loginFailureUrl;
-		this.loginSuccessUrl = loginSuccessUrl;
+		this.onSuccess = onSuccess;
 	}
 	
 	public RequestMatcher loginRequest() {
@@ -79,7 +78,8 @@ public class FormBasedLogin {
 
 				SummerContextImpl.setAuthenticatedAs(username);
 				sessionWriter.startSession(request, response, username);
-				response.sendRedirect(request.getContextPath() + loginSuccessUrl);
+				onSuccess.allow(request, response);
+//				response.sendRedirect(request.getContextPath() + loginSuccessUrl);
 				System.out.println("Credentials check out!");
 				return ContinueOrRespond.STOP;
 			}
