@@ -13,7 +13,7 @@ public final class Status implements Responder {
 	}
 
 	@Override
-	public ContinueOrRespond allow(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setStatus(status);
 		return ContinueOrRespond.STOP;
 	}

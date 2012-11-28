@@ -6,7 +6,7 @@ import com.hencjo.summer.api.Responder;
 
 public final class Allow implements Responder {
 	@Override
-	public Responder.ContinueOrRespond allow(HttpServletRequest request, HttpServletResponse response) {
+	public Responder.ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) {
 		return Responder.ContinueOrRespond.CONTINUE;
 	}
 

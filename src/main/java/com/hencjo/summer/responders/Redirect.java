@@ -13,7 +13,7 @@ public final class Redirect implements Responder {
 	}
 
 	@Override
-	public ContinueOrRespond allow(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendRedirect(request.getContextPath() + where);
 		return ContinueOrRespond.STOP;
 	}

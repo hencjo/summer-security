@@ -26,7 +26,7 @@ public final class Summer {
 			if (!ra.rule.matches(request)) continue;
 			System.out.println(" ==> MATCH!");
 			
-			if (ra.authorizer.allow(request, response) == Responder.ContinueOrRespond.STOP) {
+			if (ra.authorizer.respond(request, response) == Responder.ContinueOrRespond.STOP) {
 				System.out.println(" ==> STOPPED");
 				return;
 			}

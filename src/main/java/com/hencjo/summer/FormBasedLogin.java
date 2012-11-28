@@ -61,7 +61,7 @@ public class FormBasedLogin {
 	public Responder performLoginRequest() {
 		return new Responder() {
 			@Override
-			public ContinueOrRespond allow(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				String username = request.getParameter(usernameParameter);
 				String password = request.getParameter(passwordParameter);
 
@@ -78,7 +78,7 @@ public class FormBasedLogin {
 
 				SummerContextImpl.setAuthenticatedAs(username);
 				sessionWriter.startSession(request, response, username);
-				onSuccess.allow(request, response);
+				onSuccess.respond(request, response);
 //				response.sendRedirect(request.getContextPath() + loginSuccessUrl);
 				System.out.println("Credentials check out!");
 				return ContinueOrRespond.STOP;
@@ -95,7 +95,7 @@ public class FormBasedLogin {
 	public Responder performLogoutRequest() {
 		return new Responder() {
 			@Override
-			public ContinueOrRespond allow(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				System.out.println("Logout");
 				sessionWriter.stopSession(request, response);
 				response.sendRedirect(request.getContextPath() + loggedOutUrl);
