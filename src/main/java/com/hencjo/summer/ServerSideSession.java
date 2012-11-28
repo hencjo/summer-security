@@ -32,7 +32,7 @@ public class ServerSideSession {
 			
 			@Override
 			public String describer() {
-				return "ClientSideSession";
+				return "ServerSideSession";
 			}
 		};
 	}
