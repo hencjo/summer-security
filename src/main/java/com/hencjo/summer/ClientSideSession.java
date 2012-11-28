@@ -12,17 +12,18 @@ import com.hencjo.summer.utils.Base64;
 import com.hencjo.summer.utils.Charsets;
 
 public class ClientSideSession {
-	private static final String COOKIE = "JSESSIONID";
+	private final String sessionCookie;
 	private final ClientSideEncryption encryption;
 	private final Base64 base64 = new Base64();
 	private final Cookies cookies = new Cookies();
 
-	public ClientSideSession(ClientSideEncryption encryption) {
-		this.encryption = encryption; 
+	public ClientSideSession(ClientSideEncryption encryption, String sessionCookie) {
+		this.encryption = encryption;
+		this.sessionCookie = sessionCookie;
 	}
 	
 	public String hasClientSideSession(HttpServletRequest request) {
-		List<Cookie> cs = cookiesWithName(request, COOKIE);
+		List<Cookie> cs = cookiesWithName(request, sessionCookie);
 		if (cs.isEmpty()) return null;
 		for (Cookie c : cs) {
 			byte[] decode = encryption.decode(base64.decode(c.getValue()));
@@ -70,12 +71,12 @@ public class ClientSideSession {
 		return new SessionWriter() {
 			@Override
 			public void startSession(HttpServletRequest request, HttpServletResponse response, String username) {
-				response.addHeader("Set-Cookie", cookies.setCookie(System.currentTimeMillis(), COOKIE, request.getContextPath(), base64.encode(encryption.encode(username.getBytes(Charsets.utf8))), 3600));
+				response.addHeader("Set-Cookie", cookies.setCookie(System.currentTimeMillis(), sessionCookie, request.getContextPath(), base64.encode(encryption.encode(username.getBytes(Charsets.utf8))), 3600));
 			}
 			
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
-				response.addHeader("Set-Cookie", cookies.removeCookie(COOKIE, request.getContextPath()));
+				response.addHeader("Set-Cookie", cookies.removeCookie(sessionCookie, request.getContextPath()));
 			}
 		};
 	}
