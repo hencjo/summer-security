@@ -9,6 +9,8 @@ import com.hencjo.summer.api.Responder;
 import com.hencjo.summer.utils.HttpServletRequests;
 
 public final class FormBasedLogin {
+	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
+	
 	private final Authenticator authenticator;
 	private final SessionWriter sessionWriter;
 
@@ -78,7 +80,7 @@ public final class FormBasedLogin {
 					return ContinueOrRespond.STOP;
 				}
 
-				SummerContextImpl.setAuthenticatedAs(username);
+				summerAuthenticatedUser.set(request, username);
 				sessionWriter.startSession(request, response, username);
 				loginSuccess.respond(request, response);
 				System.out.println("Credentials check out!");

@@ -8,6 +8,7 @@ import com.hencjo.summer.utils.Charsets;
 
 public final class HttpBasicAuthenticator {
 	private final Authenticator authenticator;
+	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	private final Base64 base64 = new Base64();
 
 	public HttpBasicAuthenticator(Authenticator authenticator) {
@@ -26,11 +27,9 @@ public final class HttpBasicAuthenticator {
 				if (split.length != 2) return false;
 				String username = split[0];
 				String password = split[1];
-				if (authenticator.authenticate(username, password)) {
-					SummerContextImpl.setAuthenticatedAs(username);
-					return true;
-				}
-				return false;
+				if (!authenticator.authenticate(username, password)) return false;
+				summerAuthenticatedUser.set(request, username);
+				return true;
 			}
 			
 			@Override

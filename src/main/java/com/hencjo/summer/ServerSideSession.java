@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.api.RequestMatcher;
 
 public final class ServerSideSession {
+	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	private final String sessionAttribute;
 
 	public ServerSideSession(String sessionAttribute) {
@@ -23,11 +24,9 @@ public final class ServerSideSession {
 			@Override
 			public boolean matches(HttpServletRequest request) {
 				String loggedInUsername = hasSessionWithUsername(request);
-				if (loggedInUsername != null) {
-					SummerContextImpl.setAuthenticatedAs(loggedInUsername);
-					return true;
-				}
-				return false;
+				if (loggedInUsername == null) return false;
+				summerAuthenticatedUser.set(request, loggedInUsername);
+				return true;
 			}
 			
 			@Override
