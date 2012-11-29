@@ -7,6 +7,7 @@ It's design goals are:
 * Minimalistic dependencies. Summer Security don't clutter your classpath. And it doesn't depend on any logging framework. The only dependency is the Servlet API.
 * Configuration in code, not XML or Annotations. 
 * Simple to extend with own Request Mathers and Responders.
+* Summer Security does not use ThreadLocal to store the logged in user, but the HttpServletRequest.
 
 Example:
 
