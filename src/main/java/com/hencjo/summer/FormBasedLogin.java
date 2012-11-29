@@ -35,7 +35,7 @@ public class FormBasedLogin {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return ("POST".equals(request.getMethod()) && HttpServletRequests.fullUri(request).equals(loginUrl));
+				return ("POST".equals(request.getMethod()) && HttpServletRequests.path(request).equals(loginUrl));
 			}
 			
 			@Override
@@ -49,7 +49,7 @@ public class FormBasedLogin {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return HttpServletRequests.fullUri(request).equals(logoutUrl);
+				return HttpServletRequests.path(request).equals(logoutUrl);
 			}
 			
 			@Override

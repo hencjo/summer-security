@@ -13,7 +13,7 @@ public class PathBeginsWith implements RequestMatcher {
 
 	@Override
 	public boolean matches(HttpServletRequest request) {
-		return HttpServletRequests.fullUri(request).startsWith(beginsWith);
+		return HttpServletRequests.path(request).startsWith(beginsWith);
 	}
 
 	@Override

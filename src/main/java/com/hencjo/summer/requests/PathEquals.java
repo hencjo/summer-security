@@ -13,7 +13,7 @@ public class PathEquals implements RequestMatcher {
 
 	@Override
 	public boolean matches(HttpServletRequest request) {
-		return HttpServletRequests.fullUri(request).equals(equals);
+		return HttpServletRequests.path(request).equals(equals);
 	}
 	
 	@Override
