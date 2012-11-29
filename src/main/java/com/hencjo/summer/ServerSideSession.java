@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.api.RequestMatcher;
 
-public class ServerSideSession {
+public final class ServerSideSession {
 	private final String sessionAttribute;
 
 	public ServerSideSession(String sessionAttribute) {

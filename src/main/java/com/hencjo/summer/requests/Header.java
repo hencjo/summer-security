@@ -3,7 +3,7 @@ package com.hencjo.summer.requests;
 import javax.servlet.http.HttpServletRequest;
 import com.hencjo.summer.api.RequestMatcher;
 
-public class Header {
+public final class Header {
 	private final String header;
 
 	public Header(String header) {

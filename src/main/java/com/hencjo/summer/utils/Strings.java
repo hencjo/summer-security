@@ -1,9 +1,7 @@
 package com.hencjo.summer.utils;
 
-public class Strings {
-
+public final class Strings {
 	public static String nullToEmpty(String s) {
 		return (s != null)?s:"";
 	}
-
 }

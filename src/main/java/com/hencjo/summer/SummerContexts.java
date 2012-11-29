@@ -1,6 +1,6 @@
 package com.hencjo.summer;
 
-public class SummerContexts {
+public final class SummerContexts {
 	private static SummerContext instance = new SummerContext() {
 		@Override
 		public String getAuthenticatedAs() {

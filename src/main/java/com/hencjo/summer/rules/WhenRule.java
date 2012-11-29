@@ -8,7 +8,7 @@ import com.hencjo.summer.api.Responder;
 import com.hencjo.summer.responders.Allow;
 import com.hencjo.summer.responders.Status;
 
-public class WhenRule implements Rule {
+public final class WhenRule implements Rule {
 	private final RequestMatcher requestMatcher;
 	
 	public WhenRule(RequestMatcher requestMatcher) {

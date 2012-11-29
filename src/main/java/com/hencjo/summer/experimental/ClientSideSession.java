@@ -14,7 +14,7 @@ import com.hencjo.summer.encryption.ClientSideEncryption;
 import com.hencjo.summer.utils.Base64;
 import com.hencjo.summer.utils.Charsets;
 
-public class ClientSideSession {
+public final class ClientSideSession {
 	private final String sessionCookie;
 	private final ClientSideEncryption encryption;
 	private final Base64 base64 = new Base64();
@@ -68,13 +68,11 @@ public class ClientSideSession {
 		};
 	}
 	
-	
-
 	public SessionWriter sessionWriter(final int expiresInSeconds) {
 		return new SessionWriter() {
 			@Override
 			public void startSession(HttpServletRequest request, HttpServletResponse response, String username) {
-				response.addHeader("Set-Cookie", cookies.setCookie(System.currentTimeMillis(), sessionCookie, request.getContextPath(), base64.encode(encryption.encode(username.getBytes(Charsets.utf8))), expiresInSeconds));
+				response.addHeader("Set-Cookie", cookies.setCookie(System.currentTimeMillis(), sessionCookie, request.getContextPath(), base64.encode(encryption.encode(username.getBytes(Charsets.UTF8))), expiresInSeconds));
 			}
 			
 			@Override

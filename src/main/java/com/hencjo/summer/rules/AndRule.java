@@ -7,7 +7,7 @@ import com.hencjo.summer.api.Responder;
 import com.hencjo.summer.responders.Allow;
 import com.hencjo.summer.responders.Status;
 
-public class AndRule implements Rule {
+public final class AndRule implements Rule {
 	private final Rule left;
 	private final Rule right;
 	

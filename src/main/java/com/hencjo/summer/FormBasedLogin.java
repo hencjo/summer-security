@@ -3,11 +3,12 @@ package com.hencjo.summer;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.hencjo.summer.api.Authenticator;
 import com.hencjo.summer.api.RequestMatcher;
 import com.hencjo.summer.api.Responder;
 import com.hencjo.summer.utils.HttpServletRequests;
 
-public class FormBasedLogin {
+public final class FormBasedLogin {
 	private final Authenticator authenticator;
 	private final SessionWriter sessionWriter;
 

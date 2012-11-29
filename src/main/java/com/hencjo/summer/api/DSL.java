@@ -9,7 +9,7 @@ import com.hencjo.summer.responders.Redirect;
 import com.hencjo.summer.responders.Status;
 import com.hencjo.summer.rules.WhenRule;
 
-public class DSL {
+public final class DSL {
 	public static Header header(final String header) {
 		return new Header(header);
 	}

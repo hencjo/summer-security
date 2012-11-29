@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.hencjo.summer.api.RequestMatcher;
 import com.hencjo.summer.utils.HttpServletRequests;
 
-public class PathBeginsWith implements RequestMatcher {
+public final class PathBeginsWith implements RequestMatcher {
 	private final String beginsWith;
 
 	public PathBeginsWith(String beginsWith) {

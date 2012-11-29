@@ -1,6 +1,6 @@
 package com.hencjo.summer;
 
-public class SummerContextImpl implements SummerContext {
+public final class SummerContextImpl implements SummerContext {
 	public static final ThreadLocal<String> authenticatedAs = new ThreadLocal<String>() {
 		@Override
 		protected String initialValue() {

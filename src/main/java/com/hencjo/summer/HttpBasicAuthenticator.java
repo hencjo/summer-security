@@ -1,11 +1,12 @@
 package com.hencjo.summer;
 
 import javax.servlet.http.HttpServletRequest;
+import com.hencjo.summer.api.Authenticator;
 import com.hencjo.summer.api.RequestMatcher;
 import com.hencjo.summer.utils.Base64;
 import com.hencjo.summer.utils.Charsets;
 
-public class HttpBasicAuthenticator {
+public final class HttpBasicAuthenticator {
 	private final Authenticator authenticator;
 	private final Base64 base64 = new Base64();
 
@@ -20,7 +21,7 @@ public class HttpBasicAuthenticator {
 				String authorization = request.getHeader("Authorization");
 				if (authorization == null) return false;
 				if (!authorization.startsWith("Basic")) return false;
-				String usernameColonPassword = new String(base64.decode(authorization.substring(6)), Charsets.utf8);
+				String usernameColonPassword = new String(base64.decode(authorization.substring(6)), Charsets.UTF8);
 				String[] split = usernameColonPassword.split(":");
 				if (split.length != 2) return false;
 				String username = split[0];

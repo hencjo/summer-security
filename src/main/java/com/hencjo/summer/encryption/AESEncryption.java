@@ -49,11 +49,11 @@ public final class AESEncryption implements ClientSideEncryption {
 //		System.out.println("key: " + Base64.encode(generateKey2));
 		
 		String in = "hello";
-		byte[] encode = clientSideEncryption.encode(in.getBytes(Charsets.utf8));
+		byte[] encode = clientSideEncryption.encode(in.getBytes(Charsets.UTF8));
 		
-		String decode = new String(clientSideEncryption.decode(new Base64().decode("4tt8i/Ff1Q1kzQHTkUoKQg==")), Charsets.utf8);
+		String decode = new String(clientSideEncryption.decode(new Base64().decode("4tt8i/Ff1Q1kzQHTkUoKQg==")), Charsets.UTF8);
 		System.out.println("Encoding: " + in);
-		System.out.println(" => " + new String(encode, Charsets.utf8));
+		System.out.println(" => " + new String(encode, Charsets.UTF8));
 		System.out.println("And back: " + decode);
 	}
 }

@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.hencjo.summer.api.RequestMatcher;
 import com.hencjo.summer.utils.HttpServletRequests;
 
-public class PathEquals implements RequestMatcher {
+public final class PathEquals implements RequestMatcher {
 	private final String equals;
 
 	public PathEquals(String beginsWith) {
