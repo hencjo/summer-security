@@ -10,23 +10,23 @@ import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.api.Responder;
 
 public final class SummerFilterDelegate {
-	private final RuleAuthorizer[] ruleAuthorizers;
+	private final SummerRule[] summerRules;
 	
-	public SummerFilterDelegate(RuleAuthorizer ... ruleAuthorizers) {
-		this.ruleAuthorizers = ruleAuthorizers;
+	public SummerFilterDelegate(SummerRule ... summerRules) {
+		this.summerRules = summerRules;
 	}
 	
 	public void doFilter(ServletRequest sreq, ServletResponse sres, FilterChain filterChain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) sreq;
 		HttpServletResponse response = (HttpServletResponse) sres;
 		
-		for (RuleAuthorizer ra : ruleAuthorizers) {
-			System.out.println("Applying " + ra.describer() + " to " + pretty(request));
+		for (SummerRule sr : summerRules) {
+			System.out.println("Applying " + sr.describer() + " to " + pretty(request));
 			
-			if (!ra.rule.matches(request)) continue;
+			if (!sr.rule.matches(request)) continue;
 			System.out.println(" ==> MATCH!");
 			
-			if (ra.authorizer.respond(request, response) == Responder.ContinueOrRespond.STOP) {
+			if (sr.authorizer.respond(request, response) == Responder.ContinueOrRespond.STOP) {
 				System.out.println(" ==> STOPPED");
 				return;
 			}

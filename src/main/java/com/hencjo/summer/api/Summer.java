@@ -1,6 +1,6 @@
 package com.hencjo.summer.api;
 
-import com.hencjo.summer.RuleAuthorizer;
+import com.hencjo.summer.SummerRule;
 import com.hencjo.summer.SummerFilterDelegate;
 import com.hencjo.summer.requests.AnyPath;
 import com.hencjo.summer.requests.Header;
@@ -13,7 +13,7 @@ import com.hencjo.summer.rules.WhenRule;
 
 public final class Summer {
 	
-	public static SummerFilterDelegate summer(RuleAuthorizer ... rules) {
+	public static SummerFilterDelegate summer(SummerRule ... rules) {
 		return new SummerFilterDelegate(rules);
 	}
 	

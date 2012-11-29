@@ -2,11 +2,11 @@ package com.hencjo.summer;
 
 import com.hencjo.summer.api.Responder;
 
-public final class RuleAuthorizer {
+public final class SummerRule {
 	final Rule rule;
 	final Responder authorizer;
 
-	public RuleAuthorizer(Rule rule, Responder authorizer) {
+	public SummerRule(Rule rule, Responder authorizer) {
 		this.rule = rule;
 		this.authorizer = authorizer;
 	}

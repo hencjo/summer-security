@@ -2,7 +2,7 @@ package com.hencjo.summer.rules;
 
 import javax.servlet.http.HttpServletRequest;
 import com.hencjo.summer.Rule;
-import com.hencjo.summer.RuleAuthorizer;
+import com.hencjo.summer.SummerRule;
 import com.hencjo.summer.api.Responder;
 import com.hencjo.summer.responders.Allow;
 import com.hencjo.summer.responders.Status;
@@ -16,8 +16,8 @@ public final class AndRule implements Rule {
 		this.right = right;
 	}
 	
-	public RuleAuthorizer then(Responder a) {
-		return new RuleAuthorizer(this, a);
+	public SummerRule then(Responder a) {
+		return new SummerRule(this, a);
 	}
 	
 	public Rule and(Rule r) {
@@ -34,11 +34,11 @@ public final class AndRule implements Rule {
 		return "And(" + left.describer() + "," + right.describer() + ")";
 	}
 	
-	public RuleAuthorizer thenAllow() {
-		return new RuleAuthorizer(this, new Allow());
+	public SummerRule thenAllow() {
+		return new SummerRule(this, new Allow());
 	}
 	
-	public RuleAuthorizer thenDeny() {
-		return new RuleAuthorizer(this, new Status(403));
+	public SummerRule thenDeny() {
+		return new SummerRule(this, new Status(403));
 	}
 }
