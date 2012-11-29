@@ -2,6 +2,7 @@ package com.hencjo.summer.requests;
 
 import javax.servlet.http.HttpServletRequest;
 import com.hencjo.summer.api.RequestMatcher;
+import com.hencjo.summer.utils.HttpServletRequests;
 
 public class PathBeginsWith implements RequestMatcher {
 	private final String beginsWith;
@@ -12,9 +13,9 @@ public class PathBeginsWith implements RequestMatcher {
 
 	@Override
 	public boolean matches(HttpServletRequest request) {
-		return request.getPathInfo().startsWith(beginsWith);
+		return HttpServletRequests.fullUri(request).startsWith(beginsWith);
 	}
-	
+
 	@Override
 	public String describer() {
 		return "PathBeginsWith \"" + this.beginsWith + "\"";

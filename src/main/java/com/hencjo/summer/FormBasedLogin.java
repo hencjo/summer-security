@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.api.RequestMatcher;
 import com.hencjo.summer.api.Responder;
+import com.hencjo.summer.utils.HttpServletRequests;
 
 public class FormBasedLogin {
 	private final Authenticator authenticator;
@@ -34,7 +35,7 @@ public class FormBasedLogin {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return ("POST".equals(request.getMethod()) && loginUrl.equals(request.getPathInfo()));
+				return ("POST".equals(request.getMethod()) && HttpServletRequests.fullUri(request).equals(loginUrl));
 			}
 			
 			@Override
@@ -48,7 +49,7 @@ public class FormBasedLogin {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return (logoutUrl.equals(request.getPathInfo()));
+				return HttpServletRequests.fullUri(request).equals(logoutUrl);
 			}
 			
 			@Override

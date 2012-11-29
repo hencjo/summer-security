@@ -2,6 +2,7 @@ package com.hencjo.summer.requests;
 
 import javax.servlet.http.HttpServletRequest;
 import com.hencjo.summer.api.RequestMatcher;
+import com.hencjo.summer.utils.HttpServletRequests;
 
 public class PathEquals implements RequestMatcher {
 	private final String equals;
@@ -12,7 +13,7 @@ public class PathEquals implements RequestMatcher {
 
 	@Override
 	public boolean matches(HttpServletRequest request) {
-		return request.getPathInfo().equals(equals);
+		return HttpServletRequests.fullUri(request).equals(equals);
 	}
 	
 	@Override
