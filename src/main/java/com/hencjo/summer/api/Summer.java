@@ -11,7 +11,7 @@ import com.hencjo.summer.responders.Redirect;
 import com.hencjo.summer.responders.Status;
 import com.hencjo.summer.rules.WhenRule;
 
-public final class DSL {
+public final class Summer {
 	
 	public static SummerFilterDelegate summer(RuleAuthorizer ... rules) {
 		return new SummerFilterDelegate(rules);
