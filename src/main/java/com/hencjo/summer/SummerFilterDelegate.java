@@ -16,27 +16,27 @@ public final class SummerFilterDelegate {
 		this.summerRules = summerRules;
 	}
 	
-	public void doFilter(ServletRequest sreq, ServletResponse sres, FilterChain filterChain) throws IOException, ServletException {
-		HttpServletRequest request = (HttpServletRequest) sreq;
-		HttpServletResponse response = (HttpServletResponse) sres;
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+		HttpServletRequest req = (HttpServletRequest) request;
+		HttpServletResponse res = (HttpServletResponse) response;
 		
 		for (SummerRule sr : summerRules) {
-			System.out.println("Applying " + sr.describer() + " to " + pretty(request));
+			System.out.println("Applying " + sr.describer() + " to " + pretty(req));
 			
-			if (!sr.rule.matches(request)) continue;
+			if (!sr.rule.matches(req)) continue;
 			System.out.println(" ==> MATCH!");
 			
-			if (sr.authorizer.respond(request, response) == Responder.ContinueOrRespond.STOP) {
+			if (sr.authorizer.respond(req, res) == Responder.ContinueOrRespond.STOP) {
 				System.out.println(" ==> STOPPED");
 				return;
 			}
 			
 			System.out.println(" ==> ALLOWED");
-			filterChain.doFilter(sreq, sres);
+			filterChain.doFilter(request, response);
 			return;
 		}
 		
-		response.sendError(500, "Reached Autumn. Please end Summer Security's configuration with a deny-all to avoid this.");
+		res.sendError(500, "Reached Autumn. Please end Summer Security's configuration with a deny-all to avoid this.");
 	}
 
 	private static String pretty(HttpServletRequest req) {
