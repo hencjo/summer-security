@@ -1,5 +1,7 @@
 package com.hencjo.summer.api;
 
+import com.hencjo.summer.RuleAuthorizer;
+import com.hencjo.summer.SummerFilterDelegate;
 import com.hencjo.summer.requests.AnyPath;
 import com.hencjo.summer.requests.Header;
 import com.hencjo.summer.requests.PathBeginsWith;
@@ -10,6 +12,13 @@ import com.hencjo.summer.responders.Status;
 import com.hencjo.summer.rules.WhenRule;
 
 public final class DSL {
+	
+	public static SummerFilterDelegate summer(RuleAuthorizer ... rules) {
+		return new SummerFilterDelegate(rules);
+	}
+	
+	// REQUEST MATCHERS
+	
 	public static Header header(final String header) {
 		return new Header(header);
 	}

@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.api.Responder;
 
-public final class Summer {
+public final class SummerFilterDelegate {
 	private final RuleAuthorizer[] ruleAuthorizers;
 	
-	public Summer(RuleAuthorizer ... ruleAuthorizers) {
+	public SummerFilterDelegate(RuleAuthorizer ... ruleAuthorizers) {
 		this.ruleAuthorizers = ruleAuthorizers;
 	}
 	
