@@ -14,7 +14,11 @@ import com.hencjo.summer.rules.WhenRule;
 public final class Summer {
 	
 	public static SummerFilterDelegate summer(SummerRule ... rules) {
-		return new SummerFilterDelegate(rules);
+		return new SummerFilterDelegate(Loggers.noop(), rules);
+	}
+
+	public static SummerFilterDelegate summer(SummerLogger logger, SummerRule ... summerRules) {
+		return new SummerFilterDelegate(logger, summerRules);
 	}
 	
 	// REQUEST MATCHERS

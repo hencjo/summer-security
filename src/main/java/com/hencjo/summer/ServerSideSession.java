@@ -24,7 +24,7 @@ public final class ServerSideSession {
 			@Override
 			public boolean matches(HttpServletRequest request) {
 				String loggedInUsername = hasSessionWithUsername(request);
-				if (loggedInUsername == null) return false;
+				if (loggedInUsername == null || loggedInUsername.isEmpty()) return false;
 				summerAuthenticatedUser.set(request, loggedInUsername);
 				return true;
 			}

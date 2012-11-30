@@ -8,11 +8,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.api.Responder;
+import com.hencjo.summer.api.SummerLogger;
 
 public final class SummerFilterDelegate {
+	private final SummerLogger logger;
 	private final SummerRule[] summerRules;
 	
-	public SummerFilterDelegate(SummerRule ... summerRules) {
+	public SummerFilterDelegate(SummerLogger logger, SummerRule ... summerRules) {
+		this.logger = logger;
 		this.summerRules = summerRules;
 	}
 	
@@ -21,17 +24,18 @@ public final class SummerFilterDelegate {
 		HttpServletResponse res = (HttpServletResponse) response;
 		
 		for (SummerRule sr : summerRules) {
-			System.out.println("Applying " + sr.describer() + " to " + pretty(req));
-			
-			if (!sr.rule.matches(req)) continue;
-			System.out.println(" ==> MATCH!");
+			logger.debug("Applying " + sr.describer() + " to " + pretty(req));
+			if (!sr.rule.matches(req)) {
+				continue;
+			}
+			logger.debug(sr.describer() + " to " + pretty(req) + " ==> MATCH!");
 			
 			if (sr.authorizer.respond(req, res) == Responder.ContinueOrRespond.STOP) {
-				System.out.println(" ==> STOPPED");
+				logger.debug(" ==> STOPPED");
 				return;
 			}
 			
-			System.out.println(" ==> ALLOWED");
+			logger.debug(" ==> ALLOWED");
 			filterChain.doFilter(request, response);
 			return;
 		}

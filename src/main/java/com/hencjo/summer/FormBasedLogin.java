@@ -3,14 +3,13 @@ package com.hencjo.summer;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.hencjo.summer.api.Authenticator;
-import com.hencjo.summer.api.RequestMatcher;
-import com.hencjo.summer.api.Responder;
+import com.hencjo.summer.api.*;
 import com.hencjo.summer.utils.HttpServletRequests;
 
 public final class FormBasedLogin {
 	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	
+	private final SummerLogger summerLogger;
 	private final Authenticator authenticator;
 	private final SessionWriter sessionWriter;
 
@@ -21,8 +20,10 @@ public final class FormBasedLogin {
 	private final Responder loggedOut;
 	private final Responder loginFailure;
 	private final Responder loginSuccess;
+
 	
-	public FormBasedLogin(Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
+	public FormBasedLogin(SummerLogger summerLogger, Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
+		this.summerLogger = summerLogger;
 		this.authenticator = authenticator;
 		this.sessionWriter = sessionWriter;
 		this.loginUrl = loginUrl;
@@ -74,8 +75,8 @@ public final class FormBasedLogin {
 					return ContinueOrRespond.STOP;
 				}
 
-				System.out.println("Check credentials: " + username + "/" + password);
 				if (!authenticator.authenticate(username, password)) {
+					summerLogger.info("FormBasedLogin. Authentication failed for user \"" + username + "\".");
 					loginFailure.respond(request, response);
 					return ContinueOrRespond.STOP;
 				}
@@ -83,7 +84,7 @@ public final class FormBasedLogin {
 				summerAuthenticatedUser.set(request, username);
 				sessionWriter.startSession(request, response, username);
 				loginSuccess.respond(request, response);
-				System.out.println("Credentials check out!");
+				summerLogger.info("FormBasedLogin. Authentication successful for user \"" + username + "\".");
 				return ContinueOrRespond.STOP;
 			}
 
@@ -99,7 +100,7 @@ public final class FormBasedLogin {
 		return new Responder() {
 			@Override
 			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
-				System.out.println("Logout");
+				summerLogger.info("FormBasedLogin. Logout");
 				sessionWriter.stopSession(request, response);
 				loggedOut.respond(request, response);
 				return ContinueOrRespond.STOP;
