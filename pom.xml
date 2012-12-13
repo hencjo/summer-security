@@ -8,6 +8,24 @@
 
 	<packaging>jar</packaging>
 	<name>Summer Web Security</name>
+	<description>Java web-app authentication library.</description>
+	<url>https://github.com/hencjo/summer-security</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>henrik</id>
+			<name>Henrik Johansson</name>
+			<email>henrik@hencjo.com</email>
+		</developer>
+	</developers>
 
 	<dependencies>
 		<dependency>
