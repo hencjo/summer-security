@@ -4,7 +4,7 @@
 
 	<groupId>com.hencjo.summer</groupId>
 	<artifactId>summer-security</artifactId>
-	<version>1-SNAPSHOT</version>
+	<version>1-NO-VERSION-SNAPSHOT</version>
 
 	<packaging>jar</packaging>
 	<name>Summer Web Security</name>
