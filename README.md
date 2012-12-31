@@ -11,6 +11,7 @@ It's design goals are:
 
 Example:
 
+```java
     import java.io.IOException;
   	import javax.servlet.*;
   	import com.hencjo.summer.*;
@@ -45,3 +46,4 @@ Example:
   			summer.doFilter(request, response, filterChain);
   		}
   	}
+```
