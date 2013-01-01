@@ -48,3 +48,12 @@ public class AuthenticationFilter extends AbstractFilter {
 	}
 }
 ```
+
+Include it in your pom like this:
+```xml
+<dependency>
+    <groupId>com.hencjo.summer</groupId>
+    <artifactId>summer-security</artifactId>
+    <version>1.0</version>
+</dependency>
+```
