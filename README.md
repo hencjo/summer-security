@@ -21,7 +21,7 @@ import static com.hencjo.summer.security.api.Summer.*;
 public class AuthenticationFilter extends AbstractFilter {
     private final SummerLogger logger = Loggers.noop();
     private final Authenticator authenticator = Authenticators.allowEveryoneAuthenticator();
-	private final ServerSideSession session = new ServerSideSession("JSESSIONID");
+	private final ServerSideSession session = new ServerSideSession("username");
 	private final HttpBasicAuthenticator httpBasicAuthenticator = new HttpBasicAuthenticator(authenticator);
 	private final FormBasedLogin formBasedLogin = new FormBasedLogin(logger, authenticator, session.sessionWriter(), 
 			"/j_spring_security_check", "/j_spring_security_logout", 
