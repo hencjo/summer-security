@@ -1,5 +1,6 @@
 package com.hencjo.summer.security;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.security.api.RequestMatcher;
@@ -7,6 +8,7 @@ import com.hencjo.summer.security.api.RequestMatcher;
 public final class ServerSideSession {
 	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	private final String sessionAttribute;
+	private final Cookies cookies = new Cookies();
 
 	public ServerSideSession(String sessionAttribute) {
 		this.sessionAttribute = sessionAttribute;
@@ -46,6 +48,9 @@ public final class ServerSideSession {
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
 				request.getSession(true).invalidate();
+				for (Cookie cookie : cookies.cookiesWithName(request.getCookies(), "JSESSIONID")) {
+					response.setHeader("Set-Cookie", cookies.removeCookie(cookie.getName(), cookie.getPath()));
+				}
 			}
 		};
 	}
