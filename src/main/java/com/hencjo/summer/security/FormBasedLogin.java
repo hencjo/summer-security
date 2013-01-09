@@ -72,20 +72,20 @@ public final class FormBasedLogin {
 
 				if (username == null || password == null) {
 					loginFailure.respond(request, response);
-					return ContinueOrRespond.STOP;
+					return ContinueOrRespond.RESPOND;
 				}
 
 				if (!authenticator.authenticate(username, password)) {
 					summerLogger.info("FormBasedLogin. Authentication failed for user \"" + username + "\".");
 					loginFailure.respond(request, response);
-					return ContinueOrRespond.STOP;
+					return ContinueOrRespond.RESPOND;
 				}
 
 				summerAuthenticatedUser.set(request, username);
 				sessionWriter.startSession(request, response, username);
 				loginSuccess.respond(request, response);
 				summerLogger.info("FormBasedLogin. Authentication successful for user \"" + username + "\".");
-				return ContinueOrRespond.STOP;
+				return ContinueOrRespond.RESPOND;
 			}
 
 
@@ -103,7 +103,7 @@ public final class FormBasedLogin {
 				summerLogger.info("FormBasedLogin. Logout");
 				sessionWriter.stopSession(request, response);
 				loggedOut.respond(request, response);
-				return ContinueOrRespond.STOP;
+				return ContinueOrRespond.RESPOND;
 			}
 
 			@Override

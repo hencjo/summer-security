@@ -15,7 +15,7 @@ public final class Redirect implements Responder {
 	@Override
 	public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendRedirect(request.getContextPath() + where);
-		return ContinueOrRespond.STOP;
+		return ContinueOrRespond.RESPOND;
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public final class SummerFilterDelegate {
 			}
 			logger.debug(sr.describer() + " to " + pretty(req) + " ==> MATCH!");
 			
-			if (sr.authorizer.respond(req, res) == Responder.ContinueOrRespond.STOP) {
+			if (sr.authorizer.respond(req, res) == Responder.ContinueOrRespond.RESPOND) {
 				logger.debug(" ==> STOPPED");
 				return;
 			}
