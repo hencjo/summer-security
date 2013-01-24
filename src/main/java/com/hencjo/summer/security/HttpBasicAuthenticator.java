@@ -46,7 +46,7 @@ public final class HttpBasicAuthenticator {
 		};
 	}
 
-	public Responder wwwAuthenticated() {
+	public Responder wwwAuthenticate() {
 		return new Responder() {
 			@Override
 			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
