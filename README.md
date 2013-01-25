@@ -22,7 +22,7 @@ public class AuthenticationFilter extends AbstractFilter {
     private final SummerLogger logger = Loggers.noop();
     private final Authenticator authenticator = Authenticators.allowEveryoneAuthenticator();
 	private final ServerSideSession session = new ServerSideSession("username");
-	private final HttpBasicAuthenticator httpBasicAuthenticator = new HttpBasicAuthenticator(authenticator);
+	private final HttpBasicAuthenticator httpBasicAuthenticator = new HttpBasicAuthenticator(authenticator, "Realm");
 	private final FormBasedLogin formBasedLogin = new FormBasedLogin(logger, authenticator, session.sessionWriter(), 
 			"/j_spring_security_check", "/j_spring_security_logout", 
 			"j_username", "j_password", 
@@ -54,6 +54,6 @@ Include it in your pom like this:
 <dependency>
     <groupId>com.hencjo.summer</groupId>
     <artifactId>summer-security</artifactId>
-    <version>1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
