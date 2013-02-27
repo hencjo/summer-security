@@ -1,15 +1,18 @@
 # Summer Security
 
-Summer Security is a library/DSL for Java Web Applications that need a simpler authentication mechanism. 
+Summer Security is a library/DSL for Java Web Applications that need a simpler authentication mechanism.
 
-It's design goals are:
-* Only authentication. Not authorization. Authorization is generally too domain specific to warrant using a library.
-* Minimalistic dependencies. Summer Security don't clutter your classpath. And it doesn't depend on any logging framework. The only dependency is the Servlet API.
-* Configuration in code, not XML or Annotations. 
-* Simple to extend with own Request Mathers and Responders.
-* Summer Security does not use ThreadLocal to store the logged in user, but the HttpServletRequest.
+## Features
 
-Example:
+- HTTP Basic Authentication (with or without WWW-Authenticate).
+- Form Login, compatible with Spring Security.
+- No dependencies.
+- Configuration in code. (No XML-configuration.)
+- No ThreadLocal. The logged in user is a function of the HttpRequest.
+- Only authentication. Not authorization.
+- Extendable through RequestMatchers and Responders.
+
+## Example
 
 ```java
 import java.io.IOException;
@@ -57,3 +60,7 @@ Include it in your pom like this:
     <version>1.1.1</version>
 </dependency>
 ```
+
+Summer Security is free software/open source, and is distributed under the [Apache License 2.0](http://opensource.org/licenses/Apache-2.0).
+
+Summer Security is created and maintained by Henrik Johansson (Twitter: [@hencjo](http://twitter.com/hencjo))
