@@ -38,8 +38,8 @@ public class AuthenticationFilter extends AbstractFilter {
 			when(pathEquals("/login.html")).thenAllow(),
 			when(pathEquals("/login.js")).thenAllow(),
 			when(formBasedLogin.logoutRequest()).then(formBasedLogin.performLogoutRequest()),
-			when(session.exists()).thenAllow(),
 			when(formBasedLogin.loginRequest()).then(formBasedLogin.performLoginRequest()),
+			when(session.exists()).thenAllow(),
 			when(httpBasicAuthenticator.authorizes()).thenAllow(),
 			when(header("X-Requested-With").equals("XMLHttpRequest")).then(status(403)),
 			otherwise().then(redirect("/login.html"))
