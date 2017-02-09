@@ -43,12 +43,4 @@ public final class AESEncryption implements ClientSideEncryption {
 		return new IvParameterSpec(iv);
 	}
 
-	public static byte[] sha256hash(String key) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			return digest.digest(key.getBytes(StandardCharsets.UTF_8));
-		} catch (GeneralSecurityException e) {
-			throw new RuntimeException(e);
-		}
-	}
 }
