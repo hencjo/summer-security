@@ -1,6 +1,7 @@
 package com.hencjo.summer.security;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.security.api.*;
@@ -10,7 +11,7 @@ public final class FormBasedLogin {
 	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	
 	private final SummerLogger summerLogger;
-	private final Authenticator authenticator;
+	private final Authenticator2 authenticator;
 	private final SessionWriter sessionWriter;
 
 	private final String loginUrl;
@@ -22,7 +23,7 @@ public final class FormBasedLogin {
 	private final Responder loginSuccess;
 
 	
-	public FormBasedLogin(SummerLogger summerLogger, Authenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
+	public FormBasedLogin(SummerLogger summerLogger, Authenticator2 authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
 		this.summerLogger = summerLogger;
 		this.authenticator = authenticator;
 		this.sessionWriter = sessionWriter;
@@ -75,13 +76,14 @@ public final class FormBasedLogin {
 					return ContinueOrRespond.RESPOND;
 				}
 
-				if (!authenticator.authenticate(username, password)) {
+				Optional<String> authenticate = authenticator.authenticate(username, password);
+				if (!authenticate.isPresent()) {
 					summerLogger.info("FormBasedLogin. Authentication failed for user \"" + username + "\".");
 					loginFailure.respond(request, response);
 					return ContinueOrRespond.RESPOND;
 				}
 
-				summerAuthenticatedUser.set(request, username);
+				summerAuthenticatedUser.set(request, authenticate.get());
 				sessionWriter.startSession(request, response, username);
 				loginSuccess.respond(request, response);
 				summerLogger.info("FormBasedLogin. Authentication successful for user \"" + username + "\".");

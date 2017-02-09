@@ -1,21 +1,23 @@
 package com.hencjo.summer.security;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.security.api.Authenticator;
+import com.hencjo.summer.security.api.Authenticator2;
 import com.hencjo.summer.security.api.RequestMatcher;
 import com.hencjo.summer.security.api.Responder;
 import com.hencjo.summer.security.utils.Base64;
 import com.hencjo.summer.security.utils.Charsets;
 
-public final class HttpBasicAuthenticator {
-	private final Authenticator authenticator;
+public final class HttpBasicAuthenticator<T> {
+	private final Authenticator2 authenticator;
 	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	private final Base64 base64 = new Base64();
 	private final String realm;
 
-	public HttpBasicAuthenticator(Authenticator authenticator, String realm) {
+	public HttpBasicAuthenticator(Authenticator2 authenticator, String realm) {
 		if (realm == null) throw new IllegalArgumentException("Realm may not be null.");
 		if (realm.contains("\"")) throw new IllegalArgumentException("Realm may not contain quotes (\")");
 		this.authenticator = authenticator;
@@ -34,8 +36,9 @@ public final class HttpBasicAuthenticator {
 				if (split.length != 2) return false;
 				String username = split[0];
 				String password = split[1];
-				if (!authenticator.authenticate(username, password)) return false;
-				summerAuthenticatedUser.set(request, username);
+				Optional<String> authenticate = authenticator.authenticate(username, password);
+				if (!authenticate.isPresent()) return false;
+				summerAuthenticatedUser.set(request, authenticate.get());
 				return true;
 			}
 			
