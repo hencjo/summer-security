@@ -14,7 +14,7 @@ public final class Cookies {
 		};
 	};
 	
-	public String setCookie(long time, String name, String path, String contents, int expiresInSeconds) {
+	public static String cookie(long time, String name, String path, String contents, int expiresInSeconds) {
 		Date date = new Date(time + (expiresInSeconds * 1000));
 		return new StringBuilder()
 			.append(name).append("=")
