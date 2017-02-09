@@ -1,13 +1,11 @@
 package com.hencjo.summer.security.encryption;
 
-import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.Base64;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public final class AESEncryption implements ClientSideEncryption {
+public final class AESEncryption implements DataEncryption {
 	private final SecureRandom secureRandom = new SecureRandom();
 	private final SecretKeySpec key;
 
@@ -42,5 +40,4 @@ public final class AESEncryption implements ClientSideEncryption {
 		secureRandom.nextBytes(iv);
 		return new IvParameterSpec(iv);
 	}
-
 }

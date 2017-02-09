@@ -1,6 +1,6 @@
 package com.hencjo.summer.security.encryption;
 
-public interface ClientSideEncryption {
+public interface DataEncryption {
 	Encoding encode(byte[] bytes);
 	byte[] decode(byte[] encrypted, byte[] iv);
 

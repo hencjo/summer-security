@@ -14,7 +14,7 @@ public class AESEncryptionTest {
 
 		String payload = "hello";
 		byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
-		ClientSideEncryption.Encoding e = clientSideEncryption.encode(payloadBytes);
+		DataEncryption.Encoding e = clientSideEncryption.encode(payloadBytes);
 		byte[] decodedBytes = clientSideEncryption.decode(e);
 		String decoded = new String(decodedBytes, StandardCharsets.UTF_8);
 		assertEquals(payload, decoded);
