@@ -11,6 +11,7 @@ Summer Security is a library/DSL for Java Web Applications that need a simpler a
 - No ThreadLocal. The logged in user is a function of the HttpRequest.
 - Only authentication. Not authorization.
 - Extendable through RequestMatchers and Responders.
+- Client Side Sessions adhering to RFC6896.
 
 ## Example
 
