@@ -4,11 +4,11 @@ import com.hencjo.summer.security.api.CredentialsAuthenticator;
 import com.hencjo.summer.security.api.CredentialsAuthenticator.Credentials;
 import com.hencjo.summer.security.api.RequestMatcher;
 import com.hencjo.summer.security.api.Responder;
-import com.hencjo.summer.security.utils.Charsets;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public final class HttpBasicAuthenticator {
@@ -48,7 +48,7 @@ public final class HttpBasicAuthenticator {
 		String authorization = request.getHeader("Authorization");
 		if (authorization == null) return Optional.empty();
 		if (!authorization.startsWith("Basic")) return Optional.empty();
-		String usernameColonPassword = new String(java.util.Base64.getDecoder().decode(authorization.substring(6)), Charsets.UTF8);
+		String usernameColonPassword = new String(java.util.Base64.getDecoder().decode(authorization.substring(6)), StandardCharsets.UTF_8);
 		String[] split = usernameColonPassword.split(":");
 		if (split.length != 2) return Optional.empty();
 		String username = split[0];
