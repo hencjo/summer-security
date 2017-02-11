@@ -132,8 +132,8 @@ public final class ClientSideSession {
 					System.currentTimeMillis(),
 					sessionCookie,
 					request.getContextPath(),
-					payload(username.get(), Instant.ofEpochSecond(0)),
-					expiresInSeconds
+					"",
+					0
 				));
 			}
 		};
