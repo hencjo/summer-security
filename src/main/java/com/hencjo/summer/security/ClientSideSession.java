@@ -159,14 +159,14 @@ public final class ClientSideSession {
 	}
 
 	private static String base64(byte[] iv) {
-		return java.util.Base64.getEncoder().encodeToString(iv);
+		return java.util.Base64.getUrlEncoder().encodeToString(iv);
 	}
 
 	private static String base64(String s) {
-		return Base64.encode(s.getBytes(StandardCharsets.UTF_8));
+		return base64(s.getBytes(StandardCharsets.UTF_8));
 	}
 
 	private static byte[] decode(String eData) {
-		return java.util.Base64.getDecoder().decode(eData);
+		return java.util.Base64.getUrlDecoder().decode(eData);
 	}
 }
