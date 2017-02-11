@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.security.api.RequestMatcher;
 
 public final class ServerSideSession {
-	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	private final String sessionAttribute;
 	private final Cookies cookies = new Cookies();
 
@@ -14,7 +13,7 @@ public final class ServerSideSession {
 		this.sessionAttribute = sessionAttribute;
 	}
 	
-	private String hasSessionWithUsername(HttpServletRequest request) {
+	public String sessionData(HttpServletRequest request) {
 		if (request.getSession(false) == null) return null;
 		Object attribute = request.getSession(false).getAttribute(sessionAttribute);
 		if (attribute == null || !(attribute instanceof String)) return null;
@@ -25,10 +24,7 @@ public final class ServerSideSession {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				String loggedInUsername = hasSessionWithUsername(request);
-				if (loggedInUsername == null || loggedInUsername.isEmpty()) return false;
-				summerAuthenticatedUser.set(request, loggedInUsername);
-				return true;
+				return sessionData(request) != null;
 			}
 			
 			@Override

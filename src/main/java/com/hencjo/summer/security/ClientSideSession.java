@@ -1,6 +1,7 @@
 package com.hencjo.summer.security;
 
 import com.hencjo.summer.security.api.RequestMatcher;
+import com.hencjo.summer.security.api.Responder;
 import com.hencjo.summer.security.encryption.DataEncryption;
 import com.hencjo.summer.security.encryption.Hmac;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
@@ -8,6 +9,7 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -15,10 +17,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class ClientSideSession {
-	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
 	private final String sessionCookie;
 	private final DataEncryption encryption;
 	private final int expiresInSeconds;
@@ -26,7 +28,8 @@ public final class ClientSideSession {
 
 	public ClientSideSession(
 		DataEncryption encryption,
-		Hmac hmac, String sessionCookie,
+		Hmac hmac,
+		String sessionCookie,
 		int expiresInSeconds
 	) {
 		this.encryption = encryption;
@@ -34,18 +37,40 @@ public final class ClientSideSession {
 		this.expiresInSeconds = expiresInSeconds;
 		this.hmac = hmac;
 	}
-	
-	private String hasClientSideSession(HttpServletRequest request)  {
-		List<Cookie> cs = cookiesWithName(request, sessionCookie);
-		if (cs.isEmpty()) return null;
-		for (Cookie c : cs) return examineCookie(c);
-		return null;
+
+	public Responder renewSessionContinue() {
+		return new Responder() {
+			@Override
+			public ContinueOrRespond respond(
+				HttpServletRequest request,
+				HttpServletResponse response
+			) throws IOException {
+				Optional<String> s = sessionData(request);
+				if (!s.isPresent())
+					throw new IllegalStateException("About to renew Session. But found no Session Data in Request.");
+
+				sessionWriter().startSession(request, response, s.get());
+				return ContinueOrRespond.CONTINUE;
+			}
+
+			@Override
+			public String describer() {
+				return "RenewSessionAndAllow";
+			}
+		};
 	}
 
-	private String examineCookie(Cookie c) {
+	public Optional<String> sessionData(HttpServletRequest request)  {
+		List<Cookie> cs = cookiesWithName(request, sessionCookie);
+		if (cs.isEmpty()) return Optional.empty();
+		for (Cookie c : cs) return examineCookie(c);
+		return Optional.empty();
+	}
+
+	private Optional<String> examineCookie(Cookie c) {
 		String[] split = c.getValue().split("\\|");
 		if (split.length != 5)
-			return null;
+			return Optional.empty();
 
 		String eData = split[0];
 		String eAtime = split[1];
@@ -54,16 +79,16 @@ public final class ClientSideSession {
 		String eAuthTag = split[4];
 
 		if (!eAuthTag(eData, eAtime, eTid, eIv, hmac).equals(eAuthTag))
-			return null;
+			return Optional.empty();
 
 		byte[] data = decode(eData);
 		byte[] iv = decode(eIv);
 		Instant atime = Instant.ofEpochSecond(new BigInteger(new String(decode(eAtime), StandardCharsets.UTF_8), 16).longValue());
 
 		if (atime.plus(expiresInSeconds, ChronoUnit.SECONDS).isBefore(Instant.now()))
-			return null;
+			return Optional.empty();
 
-		return new String(encryption.decode(data, iv), StandardCharsets.UTF_8);
+		return Optional.of(new String(encryption.decode(data, iv), StandardCharsets.UTF_8));
 	}
 
 	private static List<Cookie> cookiesWithName(HttpServletRequest request, String cookieName) {
@@ -76,12 +101,7 @@ public final class ClientSideSession {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				String loggedInUsername = hasClientSideSession(request);
-				if (loggedInUsername != null) {
-					summerAuthenticatedUser.set(request, loggedInUsername);
-					return true;
-				}
-				return false;
+				return sessionData(request) != null;
 			}
 			
 			@Override
@@ -106,13 +126,13 @@ public final class ClientSideSession {
 			
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
-				String username = hasClientSideSession(request);
-				if (username == null) return;
+				Optional<String> username = sessionData(request);
+				if (!username.isPresent()) return;
 				response.addHeader("Set-Cookie", Cookies.cookie(
 					System.currentTimeMillis(),
 					sessionCookie,
 					request.getContextPath(),
-					payload(username, Instant.ofEpochSecond(0)),
+					payload(username.get(), Instant.ofEpochSecond(0)),
 					expiresInSeconds
 				));
 			}

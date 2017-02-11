@@ -6,7 +6,7 @@ import java.util.Optional;
 public interface Authenticator {
 	boolean authenticate(String username, String password);
 
-	default Authenticator2 asAuthenticator2() {
-		return (username, password) -> authenticate(username, password) ? Optional.of(username) : Optional.empty();
+	default CredentialsAuthenticator asAuthenticator2() {
+		return c -> authenticate(c.username, c.password) ? Optional.of(c.username) : Optional.empty();
 	}
 }

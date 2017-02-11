@@ -5,13 +5,12 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.security.api.*;
+import com.hencjo.summer.security.api.CredentialsAuthenticator.Credentials;
 import com.hencjo.summer.security.utils.HttpServletRequests;
 
 public final class FormBasedLogin {
-	private final SummerAuthenticatedUser summerAuthenticatedUser = new SummerAuthenticatedUser();
-	
 	private final SummerLogger summerLogger;
-	private final Authenticator2 authenticator;
+	private final CredentialsAuthenticator authenticator;
 	private final SessionWriter sessionWriter;
 
 	private final String loginUrl;
@@ -23,7 +22,7 @@ public final class FormBasedLogin {
 	private final Responder loginSuccess;
 
 	
-	public FormBasedLogin(SummerLogger summerLogger, Authenticator2 authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
+	public FormBasedLogin(SummerLogger summerLogger, CredentialsAuthenticator authenticator, SessionWriter sessionWriter, String loginUrl, String logoutUrl, String usernameParameter, String passwordParameter, Responder loggedOut, Responder loginFailure, Responder loginSuccess) {
 		this.summerLogger = summerLogger;
 		this.authenticator = authenticator;
 		this.sessionWriter = sessionWriter;
@@ -68,25 +67,25 @@ public final class FormBasedLogin {
 		return new Responder() {
 			@Override
 			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
-				String username = request.getParameter(usernameParameter);
-				String password = request.getParameter(passwordParameter);
+				Optional<Credentials> credentialsOptional = credentials(request);
 
-				if (username == null || password == null) {
+				if (!credentialsOptional.isPresent()) {
 					loginFailure.respond(request, response);
 					return ContinueOrRespond.RESPOND;
 				}
 
-				Optional<String> authenticate = authenticator.authenticate(username, password);
+				Credentials credentials = credentialsOptional.get();
+
+				Optional<String> authenticate = authenticator.authenticate(credentials);
 				if (!authenticate.isPresent()) {
-					summerLogger.info("FormBasedLogin. Authentication failed for user \"" + username + "\".");
+					summerLogger.info("FormBasedLogin. Authentication failed for user \"" + credentials.username + "\".");
 					loginFailure.respond(request, response);
 					return ContinueOrRespond.RESPOND;
 				}
 
-				summerAuthenticatedUser.set(request, authenticate.get());
-				sessionWriter.startSession(request, response, username);
+				sessionWriter.startSession(request, response, credentials.username);
 				loginSuccess.respond(request, response);
-				summerLogger.info("FormBasedLogin. Authentication successful for user \"" + username + "\".");
+				summerLogger.info("FormBasedLogin. Authentication successful for user \"" + credentials.username + "\".");
 				return ContinueOrRespond.RESPOND;
 			}
 
@@ -97,7 +96,14 @@ public final class FormBasedLogin {
 			}
 		};
 	}
-	
+
+	public Optional<Credentials> credentials(HttpServletRequest request) {
+		String username = request.getParameter(usernameParameter);
+		String password = request.getParameter(passwordParameter);
+		if (username == null || password == null) return Optional.empty();
+		return Optional.of(new Credentials(username, password));
+	}
+
 	public Responder performLogoutRequest() {
 		return new Responder() {
 			@Override
