@@ -64,4 +64,4 @@ Include it in your pom like this:
 
 Summer Security is free software/open source, and is distributed under the [Apache License 2.0](http://opensource.org/licenses/Apache-2.0).
 
-Summer Security is created and maintained by Henrik Johansson (Twitter: [@hencjo](http://twitter.com/hencjo))
+Summer Security is created and maintained by Henrik Sjöstrand (Twitter: [@hencjo](http://twitter.com/hencjo))
