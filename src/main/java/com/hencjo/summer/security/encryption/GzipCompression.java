@@ -12,18 +12,20 @@ import java.util.zip.GZIPOutputStream;
 public class GzipCompression implements Compression {
 	@Override
 	public byte[] compress(byte[] x) throws IOException{
-		try(
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			GZIPOutputStream gzos = new GZIPOutputStream(baos)
-		) {
-			gzos.write(x);
+		try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+			try (GZIPOutputStream gzos = new GZIPOutputStream(baos)) {
+				gzos.write(x);
+			}
 			return baos.toByteArray();
 		}
 	}
 
 	@Override
 	public byte[] uncompress(byte[] x) throws IOException {
-		try(GZIPInputStream gzis = new GZIPInputStream(new ByteArrayInputStream(x))) {
+		try(
+			ByteArrayInputStream in = new ByteArrayInputStream(x);
+			GZIPInputStream gzis = new GZIPInputStream(in)
+		) {
 			return allBytes(gzis);
 		}
 	}
