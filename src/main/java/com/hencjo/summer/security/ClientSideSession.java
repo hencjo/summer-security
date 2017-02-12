@@ -24,7 +24,7 @@ public final class ClientSideSession {
 		this.secureCookies = secureCookies;
 	}
 
-	public Responder renewSessionContinue() {
+	public Responder renewAndAllow() {
 		return new Responder() {
 			@Override
 			public ContinueOrRespond respond(
@@ -32,10 +32,13 @@ public final class ClientSideSession {
 				HttpServletResponse response
 			) throws IOException {
 				Optional<String> s = sessionData(request);
-				if (!s.isPresent())
-					throw new IllegalStateException("About to renew Session. But found no Session Data in Request.");
+				if (!s.isPresent()) {
+					System.err.println("Entered ClientSideSession.renewAndAllow() when there was no sessionData. That should've been checked before renewing.");
+					response.sendError(401);
+					return ContinueOrRespond.RESPOND;
+				}
 
-				sessionWriter().startSession(request, response, s.get());
+				secureCookies.setCookie(request, response, cookieName, s.get(), expiresInSeconds);
 				return ContinueOrRespond.CONTINUE;
 			}
 
@@ -56,7 +59,7 @@ public final class ClientSideSession {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return sessionData(request) != null;
+				return sessionData(request).isPresent();
 			}
 			
 			@Override
@@ -65,7 +68,7 @@ public final class ClientSideSession {
 			}
 		};
 	}
-	
+
 	public SessionWriter sessionWriter() {
 		return new SessionWriter() {
 			@Override
