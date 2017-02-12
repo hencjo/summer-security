@@ -3,6 +3,7 @@ package com.hencjo.summer.security;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 public final class Cookies {
 	private static final ThreadLocal<SimpleDateFormat> HTTP_DATE = new ThreadLocal<SimpleDateFormat>() {
@@ -37,5 +38,10 @@ public final class Cookies {
 			if (cookieName.equals(cookie.getName())) matches.add(cookie);
 		}
 		return matches;
+	}
+
+	public static List<Cookie> cookies(HttpServletRequest request) {
+		if (request.getCookies() == null) return Collections.emptyList();
+		return Arrays.asList(request.getCookies());
 	}
 }

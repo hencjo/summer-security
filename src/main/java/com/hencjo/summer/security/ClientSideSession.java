@@ -92,7 +92,8 @@ public final class ClientSideSession {
 	}
 
 	private static List<Cookie> cookiesWithName(HttpServletRequest request, String cookieName) {
-		return Arrays.stream(request.getCookies())
+		return Cookies.cookies(request)
+			.stream()
 			.filter(x -> cookieName.equals(x.getName()))
 			.collect(Collectors.toList());
 	}
