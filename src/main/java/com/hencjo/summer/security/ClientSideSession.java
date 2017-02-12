@@ -44,7 +44,7 @@ public final class ClientSideSession {
 
 			@Override
 			public String describer() {
-				return "RenewSessionAndAllow";
+				return "RenewAndAllow";
 			}
 		};
 	}
