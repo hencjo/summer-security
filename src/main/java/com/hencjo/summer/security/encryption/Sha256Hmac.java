@@ -1,5 +1,7 @@
 package com.hencjo.summer.security.encryption;
 
+import com.hencjo.summer.security.api.Hmac;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;

@@ -2,43 +2,28 @@ package com.hencjo.summer.security;
 
 import com.hencjo.summer.security.api.RequestMatcher;
 import com.hencjo.summer.security.api.Responder;
-import com.hencjo.summer.security.encryption.DataEncryption;
-import com.hencjo.summer.security.encryption.Hmac;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public final class ClientSideSession {
-	private final String sessionCookie;
-	private final DataEncryption encryption;
+	private final String cookieName;
 	private final int expiresInSeconds;
-	private final Hmac hmac;
+	private final SecureCookies secureCookies;
 
 	public ClientSideSession(
-		DataEncryption encryption,
-		Hmac hmac,
-		String sessionCookie,
-		int expiresInSeconds
+		String cookieName,
+		int expiresInSeconds,
+		SecureCookies secureCookies
 	) {
-		this.encryption = encryption;
-		this.sessionCookie = sessionCookie;
+		this.cookieName = cookieName;
 		this.expiresInSeconds = expiresInSeconds;
-		this.hmac = hmac;
+		this.secureCookies = secureCookies;
 	}
 
 	public Responder renewSessionContinue() {
@@ -64,33 +49,9 @@ public final class ClientSideSession {
 	}
 
 	public Optional<String> sessionData(HttpServletRequest request)  {
-		for (Cookie c : cookiesWithName(request, sessionCookie))
-			return examineCookie(c);
+		for (Cookie c : cookiesWithName(request, cookieName))
+			return secureCookies.cookieValue(c);
 		return Optional.empty();
-	}
-
-	private Optional<String> examineCookie(Cookie c) {
-		String[] split = c.getValue().split("\\|");
-		if (split.length != 5)
-			return Optional.empty();
-
-		String eData = split[0];
-		String eAtime = split[1];
-		String eTid = split[2];
-		String eIv = split[3];
-		String eAuthTag = split[4];
-
-		if (!eAuthTag(eData, eAtime, eTid, eIv, hmac).equals(eAuthTag))
-			return Optional.empty();
-
-		byte[] data = uncompress(decode(eData));
-		byte[] iv = decode(eIv);
-		Instant atime = Instant.ofEpochSecond(new BigInteger(new String(decode(eAtime), StandardCharsets.UTF_8), 16).longValue());
-
-		if (atime.plus(expiresInSeconds, ChronoUnit.SECONDS).isBefore(Instant.now()))
-			return Optional.empty();
-
-		return Optional.of(new String(encryption.decode(data, iv), StandardCharsets.UTF_8));
 	}
 
 	private static List<Cookie> cookiesWithName(HttpServletRequest request, String cookieName) {
@@ -118,90 +79,13 @@ public final class ClientSideSession {
 		return new SessionWriter() {
 			@Override
 			public void startSession(HttpServletRequest request, HttpServletResponse response, String username) {
-				response.addHeader("Set-Cookie", Cookies.cookie(
-					System.currentTimeMillis(),
-					sessionCookie,
-					request.getContextPath(),
-					payload(username, Instant.now()),
-					expiresInSeconds
-				));
+				secureCookies.setCookie(request, response, cookieName, username, expiresInSeconds);
 			}
 			
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
-				Optional<String> username = sessionData(request);
-				if (!username.isPresent()) return;
-				response.addHeader("Set-Cookie", Cookies.cookie(
-					System.currentTimeMillis(),
-					sessionCookie,
-					request.getContextPath(),
-					"",
-					0
-				));
+				secureCookies.delete(request, response, cookieName);
 			}
 		};
-	}
-
-	private String payload(String data, Instant atime) {
-		DataEncryption.Encoding encode = encryption.encode(data.getBytes(StandardCharsets.UTF_8));
-		String eData = base64(compress(encode.data));
-		String eAtime = base64(BigInteger.valueOf(atime.getEpochSecond()).toString(16));
-		String eTid = "";
-		String eIV = base64(encode.iv);
-		String eAuthTag = eAuthTag(eData, eAtime, eTid, eIV, hmac);
-		return eData + '|' + eAtime + '|' + eTid + '|' + eIV + '|' + eAuthTag;
-	}
-
-	private static byte[] compress(byte[] data) {
-		try(
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			GZIPOutputStream gzos = new GZIPOutputStream(baos)
-		) {
-			gzos.write(data);
-			return baos.toByteArray();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static byte[] uncompress(byte[] data) {
-		try(GZIPInputStream gzis = new GZIPInputStream(new ByteArrayInputStream(data))) {
-			return allBytes(gzis);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static byte[] allBytes(InputStream is) throws IOException {
-		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-			byte[] buffer = new byte[1024];
-			while (true) {
-				int r = is.read(buffer);
-				if (r == -1) break;
-				out.write(buffer, 0, r);
-			}
-			return out.toByteArray();
-		}
-	}
-
-	private static String eAuthTag(String eData, String eAtime, String eTid, String eIv, Hmac hmac) {
-		try {
-			String message = eData + '|' + eAtime + '|' + eTid + '|' + eIv;
-			return base64(hmac.hmac(message.getBytes(StandardCharsets.UTF_8)));
-		} catch (GeneralSecurityException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static String base64(byte[] iv) {
-		return java.util.Base64.getUrlEncoder().encodeToString(iv);
-	}
-
-	private static String base64(String s) {
-		return base64(s.getBytes(StandardCharsets.UTF_8));
-	}
-
-	private static byte[] decode(String eData) {
-		return java.util.Base64.getUrlDecoder().decode(eData);
 	}
 }

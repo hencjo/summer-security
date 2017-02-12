@@ -1,4 +1,4 @@
-package com.hencjo.summer.security.encryption;
+package com.hencjo.summer.security.api;
 
 import java.security.GeneralSecurityException;
 
