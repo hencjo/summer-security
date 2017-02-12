@@ -73,13 +73,23 @@ public class SecureCookies {
 		String value,
 		int expiresInSeconds
 	) {
+		setCookie2(request, response, name, value.getBytes(StandardCharsets.UTF_8), expiresInSeconds);
+	}
+
+	private void setCookie2(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String name,
+		byte[] data,
+		int expiresInSeconds
+	) {
 		try {
 			Cookies.setCookie(response,
 				Cookies.cookie(
 					System.currentTimeMillis(),
 					name,
 					request.getContextPath(),
-					payload(current, value, Instant.now()),
+					payload(current, data, Instant.now()),
 					expiresInSeconds
 				)
 			);
@@ -92,8 +102,8 @@ public class SecureCookies {
 		Cookies.setCookie(response, Cookies.removeCookie(name, request.getContextPath()));
 	}
 
-	private String payload(Tid tid, String data, Instant atime) throws IOException, GeneralSecurityException {
-		DataEncryption.Encoding encode = tid.encryption.encode(tid.compression.compress(data.getBytes(StandardCharsets.UTF_8)));
+	private String payload(Tid tid, byte[] data, Instant atime) throws IOException, GeneralSecurityException {
+		DataEncryption.Encoding encode = tid.encryption.encode(tid.compression.compress(data));
 		String eData = base64(encode.data);
 		String eAtime = base64(BigInteger.valueOf(atime.getEpochSecond()).toString(16));
 		String eTid = base64(tid.tid);
