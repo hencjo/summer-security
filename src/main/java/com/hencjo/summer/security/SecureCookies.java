@@ -14,11 +14,12 @@ import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SecureCookies {
 	private final Tid current;
 	private final Map<String, Tid> tids;
-	private final int scsExpirationSeconds;
 
 	public SecureCookies(Tid current, Collection<Tid> deprecated, int scsExpirationSeconds) {
 		HashMap<String, Tid> tids = new HashMap<>();
@@ -27,19 +28,18 @@ public class SecureCookies {
 
 		this.current = current;
 		this.tids = Collections.unmodifiableMap(tids);
-		this.scsExpirationSeconds = scsExpirationSeconds;
 	}
 
-	public Optional<String> cookieValue(Cookie c) {
+	public Optional<String> cookieValue(Cookie c, int scsExpirationSeconds) {
 		try {
-			return ec(c);
+			return ec(c, scsExpirationSeconds);
 		} catch (GeneralSecurityException | IOException e) {
 			e.printStackTrace();
 			return Optional.empty();
 		}
 	}
 
-	private Optional<String> ec(Cookie c) throws GeneralSecurityException, IOException {
+	private Optional<String> ec(Cookie c, int scsExpirationSeconds) throws GeneralSecurityException, IOException {
 		String[] split = c.getValue().split("\\|");
 		if (split.length != 5)
 			return Optional.empty();
@@ -51,18 +51,19 @@ public class SecureCookies {
 		String eAuthTag = split[4];
 
 		Tid tid = tids.get(new String(decode(eTid), StandardCharsets.UTF_8));
-		if (tid == null) return Optional.empty();
-
-		if (!eAuthTag(eData, eAtime, eTid, eIv, tid.hmac).equals(eAuthTag))
+		if (tid == null)
 			return Optional.empty();
 
-		byte[] data = decode(eData);
-		byte[] iv = decode(eIv);
+		if (!eAuthTag(box(eData, eAtime, eTid, eIv), tid.hmac).equals(eAuthTag))
+			return Optional.empty();
+
 		Instant atime = Instant.ofEpochSecond(new BigInteger(new String(decode(eAtime), StandardCharsets.UTF_8), 16).longValue());
 
 		if (atime.plus(scsExpirationSeconds, ChronoUnit.SECONDS).isBefore(Instant.now()))
 			return Optional.empty();
 
+		byte[] data = decode(eData);
+		byte[] iv = decode(eIv);
 		return Optional.of(new String(tid.compression.uncompress(tid.encryption.decode(data, iv)), StandardCharsets.UTF_8));
 	}
 
@@ -104,21 +105,21 @@ public class SecureCookies {
 
 	private String payload(Tid tid, byte[] data, Instant atime) throws IOException, GeneralSecurityException {
 		DataEncryption.Encoding encode = tid.encryption.encode(tid.compression.compress(data));
-		String eData = base64(encode.data);
-		String eAtime = base64(BigInteger.valueOf(atime.getEpochSecond()).toString(16));
-		String eTid = base64(tid.tid);
-		String eIV = base64(encode.iv);
-		String eAuthTag = eAuthTag(eData, eAtime, eTid, eIV, tid.hmac);
-		return eData + '|' + eAtime + '|' + eTid + '|' + eIV + '|' + eAuthTag;
+		String message = box(
+			base64(encode.data),
+			base64(BigInteger.valueOf(atime.getEpochSecond()).toString(16)),
+			base64(tid.tid),
+			base64(encode.iv)
+		);
+		return box(message, eAuthTag(message, tid.hmac));
 	}
 
-	private static String eAuthTag(String eData, String eAtime, String eTid, String eIv, Hmac hmac) {
-		try {
-			String message = eData + '|' + eAtime + '|' + eTid + '|' + eIv;
-			return base64(hmac.hmac(message.getBytes(StandardCharsets.UTF_8)));
-		} catch (GeneralSecurityException e) {
-			throw new RuntimeException(e);
-		}
+	private static String box(String ... vs) {
+		return Stream.of(vs).collect(Collectors.joining("|"));
+	}
+
+	private static String eAuthTag(String message, Hmac hmac) throws GeneralSecurityException {
+		return base64(hmac.hmac(message.getBytes(StandardCharsets.UTF_8)));
 	}
 
 	private static String base64(byte[] x) {

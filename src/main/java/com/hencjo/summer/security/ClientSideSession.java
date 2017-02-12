@@ -48,7 +48,7 @@ public final class ClientSideSession {
 
 	public Optional<String> sessionData(HttpServletRequest request)  {
 		for (Cookie c : Cookies.withName(request, cookieName))
-			return secureCookies.cookieValue(c);
+			return secureCookies.cookieValue(c, expiresInSeconds);
 		return Optional.empty();
 	}
 
