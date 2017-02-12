@@ -4,12 +4,14 @@ import com.hencjo.summer.security.api.RequestMatcher;
 import com.hencjo.summer.security.api.Responder;
 import com.hencjo.summer.security.encryption.DataEncryption;
 import com.hencjo.summer.security.encryption.Hmac;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -19,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public final class ClientSideSession {
 	private final String sessionCookie;
@@ -61,9 +65,8 @@ public final class ClientSideSession {
 	}
 
 	public Optional<String> sessionData(HttpServletRequest request)  {
-		List<Cookie> cs = cookiesWithName(request, sessionCookie);
-		if (cs.isEmpty()) return Optional.empty();
-		for (Cookie c : cs) return examineCookie(c);
+		for (Cookie c : cookiesWithName(request, sessionCookie))
+			return examineCookie(c);
 		return Optional.empty();
 	}
 
@@ -81,7 +84,7 @@ public final class ClientSideSession {
 		if (!eAuthTag(eData, eAtime, eTid, eIv, hmac).equals(eAuthTag))
 			return Optional.empty();
 
-		byte[] data = decode(eData);
+		byte[] data = uncompress(decode(eData));
 		byte[] iv = decode(eIv);
 		Instant atime = Instant.ofEpochSecond(new BigInteger(new String(decode(eAtime), StandardCharsets.UTF_8), 16).longValue());
 
@@ -142,12 +145,44 @@ public final class ClientSideSession {
 
 	private String payload(String data, Instant atime) {
 		DataEncryption.Encoding encode = encryption.encode(data.getBytes(StandardCharsets.UTF_8));
-		String eData = base64(encode.data);
+		String eData = base64(compress(encode.data));
 		String eAtime = base64(BigInteger.valueOf(atime.getEpochSecond()).toString(16));
 		String eTid = "";
 		String eIV = base64(encode.iv);
 		String eAuthTag = eAuthTag(eData, eAtime, eTid, eIV, hmac);
 		return eData + '|' + eAtime + '|' + eTid + '|' + eIV + '|' + eAuthTag;
+	}
+
+	private static byte[] compress(byte[] data) {
+		try(
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			GZIPOutputStream gzos = new GZIPOutputStream(baos)
+		) {
+			gzos.write(data);
+			return baos.toByteArray();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static byte[] uncompress(byte[] data) {
+		try(GZIPInputStream gzis = new GZIPInputStream(new ByteArrayInputStream(data))) {
+			return allBytes(gzis);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static byte[] allBytes(InputStream is) throws IOException {
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			byte[] buffer = new byte[1024];
+			while (true) {
+				int r = is.read(buffer);
+				if (r == -1) break;
+				out.write(buffer, 0, r);
+			}
+			return out.toByteArray();
+		}
 	}
 
 	private static String eAuthTag(String eData, String eAtime, String eTid, String eIv, Hmac hmac) {
