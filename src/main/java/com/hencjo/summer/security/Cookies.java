@@ -2,8 +2,10 @@ package com.hencjo.summer.security;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public final class Cookies {
 	private static final ThreadLocal<SimpleDateFormat> HTTP_DATE = new ThreadLocal<SimpleDateFormat>() {
@@ -24,15 +26,22 @@ public final class Cookies {
 			.append(";Path=").append(path)
 			.toString();
 	}
-	
-	public String removeCookie(String name, String path) {
+
+	public static List<Cookie> withName(HttpServletRequest request, String cookieName) {
+		return cookies(request)
+			.stream()
+			.filter(x -> cookieName.equals(x.getName()))
+			.collect(Collectors.toList());
+	}
+
+	public static String removeCookie(String name, String path) {
 		return new StringBuilder()
 			.append(name).append("=deleted;Expires=Thu, 01-Jan-1970 00:00:00 GMT")
 			.append(";Path=").append(path)
 			.toString();
 	}
 
-	public List<Cookie> cookiesWithName(Cookie[] cookies, String cookieName) {
+	public static List<Cookie> withName(Cookie[] cookies, String cookieName) {
 		List<Cookie> matches = new ArrayList<>();
 		for (Cookie cookie : cookies) {
 			if (cookieName.equals(cookie.getName())) matches.add(cookie);
@@ -43,5 +52,9 @@ public final class Cookies {
 	public static List<Cookie> cookies(HttpServletRequest request) {
 		if (request.getCookies() == null) return Collections.emptyList();
 		return Arrays.asList(request.getCookies());
+	}
+
+	public static void setCookie(HttpServletResponse response, String value) {
+		response.setHeader("Set-Cookie", value);
 	}
 }

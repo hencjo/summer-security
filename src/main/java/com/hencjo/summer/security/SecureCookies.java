@@ -69,26 +69,22 @@ public class SecureCookies {
 		int expiresInSeconds
 	) {
 		try {
-			response.addHeader("Set-Cookie", Cookies.cookie(
-				System.currentTimeMillis(),
-				name,
-				request.getContextPath(),
-				payload(value, Instant.now()),
-				expiresInSeconds
-			));
+			Cookies.setCookie(response,
+				Cookies.cookie(
+					System.currentTimeMillis(),
+					name,
+					request.getContextPath(),
+					payload(value, Instant.now()),
+					expiresInSeconds
+				)
+			);
 		} catch (IOException | GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public void delete(HttpServletRequest request, HttpServletResponse response, String name) {
-		response.addHeader("Set-Cookie", Cookies.cookie(
-			System.currentTimeMillis(),
-			name,
-			request.getContextPath(),
-			"",
-			0
-		));
+	public void removeCookie(HttpServletRequest request, HttpServletResponse response, String name) {
+		Cookies.setCookie(response, Cookies.removeCookie(name, request.getContextPath()));
 	}
 
 	private String payload(String data, Instant atime) throws IOException, GeneralSecurityException {
@@ -110,16 +106,15 @@ public class SecureCookies {
 		}
 	}
 
-	private static String base64(byte[] iv) {
-		return java.util.Base64.getUrlEncoder().encodeToString(iv);
+	private static String base64(byte[] x) {
+		return java.util.Base64.getUrlEncoder().encodeToString(x);
 	}
 
-	private static String base64(String s) {
-		return base64(s.getBytes(StandardCharsets.UTF_8));
+	private static String base64(String x) {
+		return base64(x.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private static byte[] decode(String eData) {
-		return java.util.Base64.getUrlDecoder().decode(eData);
+	private static byte[] decode(String x) {
+		return java.util.Base64.getUrlDecoder().decode(x);
 	}
-
 }

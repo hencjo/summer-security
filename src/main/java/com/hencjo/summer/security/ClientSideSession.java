@@ -7,9 +7,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class ClientSideSession {
 	private final String cookieName;
@@ -49,16 +47,9 @@ public final class ClientSideSession {
 	}
 
 	public Optional<String> sessionData(HttpServletRequest request)  {
-		for (Cookie c : cookiesWithName(request, cookieName))
+		for (Cookie c : Cookies.withName(request, cookieName))
 			return secureCookies.cookieValue(c);
 		return Optional.empty();
-	}
-
-	private static List<Cookie> cookiesWithName(HttpServletRequest request, String cookieName) {
-		return Cookies.cookies(request)
-			.stream()
-			.filter(x -> cookieName.equals(x.getName()))
-			.collect(Collectors.toList());
 	}
 
 	public RequestMatcher exists() {
@@ -84,7 +75,7 @@ public final class ClientSideSession {
 			
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
-				secureCookies.delete(request, response, cookieName);
+				secureCookies.removeCookie(request, response, cookieName);
 			}
 		};
 	}

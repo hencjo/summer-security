@@ -12,7 +12,7 @@ public final class ServerSideSession {
 	public ServerSideSession(String sessionAttribute) {
 		this.sessionAttribute = sessionAttribute;
 	}
-	
+
 	public String sessionData(HttpServletRequest request) {
 		if (request.getSession(false) == null) return null;
 		Object attribute = request.getSession(false).getAttribute(sessionAttribute);
@@ -26,7 +26,7 @@ public final class ServerSideSession {
 			public boolean matches(HttpServletRequest request) {
 				return sessionData(request) != null;
 			}
-			
+
 			@Override
 			public String describer() {
 				return "ServerSideSession";
@@ -40,13 +40,12 @@ public final class ServerSideSession {
 			public void startSession(HttpServletRequest request, HttpServletResponse response, String username) {
 				request.getSession(true).setAttribute(sessionAttribute, username);
 			}
-			
+
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
 				request.getSession(true).invalidate();
-				for (Cookie cookie : cookies.cookiesWithName(request.getCookies(), "JSESSIONID")) {
-					response.setHeader("Set-Cookie", cookies.removeCookie(cookie.getName(), cookie.getPath()));
-				}
+				for (Cookie cookie : cookies.withName(request.getCookies(), "JSESSIONID"))
+					Cookies.setCookie(response, ServerSideSession.this.cookies.removeCookie(cookie.getName(), cookie.getPath()));
 			}
 		};
 	}
