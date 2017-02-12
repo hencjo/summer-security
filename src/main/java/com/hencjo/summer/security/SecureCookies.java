@@ -13,18 +13,20 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
+import java.util.*;
 
 public class SecureCookies {
-	private final DataEncryption encryption;
-	private final Hmac hmac;
-	private final Compression compression;
+	private final Tid current;
+	private final Map<String, Tid> tids;
 	private final int scsExpirationSeconds;
 
-	public SecureCookies(DataEncryption encryption, Hmac hmac, Compression compression, int scsExpirationSeconds) {
-		this.encryption = encryption;
-		this.hmac = hmac;
-		this.compression = compression;
+	public SecureCookies(Tid current, Collection<Tid> deprecated, int scsExpirationSeconds) {
+		HashMap<String, Tid> tids = new HashMap<>();
+		tids.put(current.tid, current);
+		for (Tid tid : deprecated) tids.put(tid.tid, tid);
+
+		this.current = current;
+		this.tids = Collections.unmodifiableMap(tids);
 		this.scsExpirationSeconds = scsExpirationSeconds;
 	}
 
@@ -48,7 +50,10 @@ public class SecureCookies {
 		String eIv = split[3];
 		String eAuthTag = split[4];
 
-		if (!eAuthTag(eData, eAtime, eTid, eIv, hmac).equals(eAuthTag))
+		Tid tid = tids.get(new String(decode(eTid), StandardCharsets.UTF_8));
+		if (tid == null) return Optional.empty();
+
+		if (!eAuthTag(eData, eAtime, eTid, eIv, tid.hmac).equals(eAuthTag))
 			return Optional.empty();
 
 		byte[] data = decode(eData);
@@ -58,7 +63,7 @@ public class SecureCookies {
 		if (atime.plus(scsExpirationSeconds, ChronoUnit.SECONDS).isBefore(Instant.now()))
 			return Optional.empty();
 
-		return Optional.of(new String(compression.uncompress(encryption.decode(data, iv)), StandardCharsets.UTF_8));
+		return Optional.of(new String(tid.compression.uncompress(tid.encryption.decode(data, iv)), StandardCharsets.UTF_8));
 	}
 
 	public void setCookie(
@@ -74,7 +79,7 @@ public class SecureCookies {
 					System.currentTimeMillis(),
 					name,
 					request.getContextPath(),
-					payload(value, Instant.now()),
+					payload(current, value, Instant.now()),
 					expiresInSeconds
 				)
 			);
@@ -87,13 +92,13 @@ public class SecureCookies {
 		Cookies.setCookie(response, Cookies.removeCookie(name, request.getContextPath()));
 	}
 
-	private String payload(String data, Instant atime) throws IOException, GeneralSecurityException {
-		DataEncryption.Encoding encode = encryption.encode(compression.compress(data.getBytes(StandardCharsets.UTF_8)));
+	private String payload(Tid tid, String data, Instant atime) throws IOException, GeneralSecurityException {
+		DataEncryption.Encoding encode = tid.encryption.encode(tid.compression.compress(data.getBytes(StandardCharsets.UTF_8)));
 		String eData = base64(encode.data);
 		String eAtime = base64(BigInteger.valueOf(atime.getEpochSecond()).toString(16));
-		String eTid = "";
+		String eTid = base64(tid.tid);
 		String eIV = base64(encode.iv);
-		String eAuthTag = eAuthTag(eData, eAtime, eTid, eIV, hmac);
+		String eAuthTag = eAuthTag(eData, eAtime, eTid, eIV, tid.hmac);
 		return eData + '|' + eAtime + '|' + eTid + '|' + eIV + '|' + eAuthTag;
 	}
 
@@ -116,5 +121,24 @@ public class SecureCookies {
 
 	private static byte[] decode(String x) {
 		return java.util.Base64.getUrlDecoder().decode(x);
+	}
+
+	public static final class Tid {
+		public final String tid;
+		public final DataEncryption encryption;
+		public final Hmac hmac;
+		public final Compression compression;
+
+		public Tid(
+			String tid,
+			DataEncryption encryption,
+			Hmac hmac,
+			Compression compression
+		) {
+			this.tid = tid;
+			this.encryption = encryption;
+			this.hmac = hmac;
+			this.compression = compression;
+		}
 	}
 }
