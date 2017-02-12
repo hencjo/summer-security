@@ -21,7 +21,7 @@ public class SecureCookies {
 	private final Tid current;
 	private final Map<String, Tid> tids;
 
-	public SecureCookies(Tid current, Collection<Tid> deprecated, int scsExpirationSeconds) {
+	public SecureCookies(Tid current, Collection<Tid> deprecated) {
 		HashMap<String, Tid> tids = new HashMap<>();
 		tids.put(current.tid, current);
 		for (Tid tid : deprecated) tids.put(tid.tid, tid);
