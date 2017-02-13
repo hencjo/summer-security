@@ -7,6 +7,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public final class ClientSideSession {
@@ -51,7 +53,7 @@ public final class ClientSideSession {
 
 	public Optional<String> sessionData(HttpServletRequest request)  {
 		for (Cookie c : Cookies.withName(request, cookieName))
-			return secureCookies.cookieValue(c, expiresInSeconds);
+			return secureCookies.cookieValue(c, Duration.of(expiresInSeconds, ChronoUnit.SECONDS));
 		return Optional.empty();
 	}
 

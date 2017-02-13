@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,25 +21,25 @@ public class SecureCookies {
 	private final Tid current;
 	private final Map<String, Tid> tids;
 
-	public SecureCookies(Tid current, Collection<Tid> deprecated) {
+	public SecureCookies(Tid currentTid, Collection<Tid> deprecatedTids) {
 		HashMap<String, Tid> tids = new HashMap<>();
-		tids.put(current.tid, current);
-		for (Tid tid : deprecated) tids.put(tid.tid, tid);
+		tids.put(currentTid.tid, currentTid);
+		for (Tid tid : deprecatedTids) tids.put(tid.tid, tid);
 
-		this.current = current;
+		this.current = currentTid;
 		this.tids = Collections.unmodifiableMap(tids);
 	}
 
-	public Optional<String> cookieValue(Cookie c, int scsExpirationSeconds) {
+	public Optional<String> cookieValue(Cookie c, Duration maxAge) {
 		try {
-			return ec(c, scsExpirationSeconds);
+			return ec(c, maxAge);
 		} catch (GeneralSecurityException | IOException e) {
 			e.printStackTrace();
 			return Optional.empty();
 		}
 	}
 
-	private Optional<String> ec(Cookie c, int scsExpirationSeconds) throws GeneralSecurityException, IOException {
+	private Optional<String> ec(Cookie c, Duration maxAge) throws GeneralSecurityException, IOException {
 		String[] split = c.getValue().split("\\|");
 		if (split.length != 5)
 			return Optional.empty();
@@ -59,7 +59,7 @@ public class SecureCookies {
 
 		Instant atime = Instant.ofEpochSecond(new BigInteger(new String(decode(eAtime), StandardCharsets.UTF_8), 16).longValue());
 
-		if (atime.plus(scsExpirationSeconds, ChronoUnit.SECONDS).isBefore(Instant.now()))
+		if (atime.plus(maxAge).isBefore(Instant.now()))
 			return Optional.empty();
 
 		byte[] data = decode(eData);
