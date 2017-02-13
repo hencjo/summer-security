@@ -74,10 +74,10 @@ public class SecureCookies {
 		String value,
 		int expiresInSeconds
 	) {
-		setCookie2(request, response, name, value.getBytes(StandardCharsets.UTF_8), expiresInSeconds);
+		setCookie(request, response, name, value.getBytes(StandardCharsets.UTF_8), expiresInSeconds);
 	}
 
-	private void setCookie2(
+	private void setCookie(
 		HttpServletRequest request,
 		HttpServletResponse response,
 		String name,
