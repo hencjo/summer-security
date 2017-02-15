@@ -4,7 +4,6 @@ import com.hencjo.summer.security.api.Compression;
 import com.hencjo.summer.security.api.DataEncryption;
 import com.hencjo.summer.security.api.Hmac;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -30,17 +29,24 @@ public class SecureCookies {
 		this.tids = Collections.unmodifiableMap(tids);
 	}
 
-	public Optional<String> cookieValue(Cookie c, Duration maxAge) {
-		try {
-			return ec(c, maxAge);
-		} catch (GeneralSecurityException | IOException e) {
-			e.printStackTrace();
-			return Optional.empty();
-		}
+	public Optional<String> decodeAsString(String rawCookieValue, Duration maxAge) throws GeneralSecurityException, IOException {
+		return value(tids, rawCookieValue, maxAge).map(x -> new String(x, StandardCharsets.UTF_8));
 	}
 
-	private Optional<String> ec(Cookie c, Duration maxAge) throws GeneralSecurityException, IOException {
-		String[] split = c.getValue().split("\\|");
+	public Optional<byte[]> decode(String rawCookieValue, Duration maxAge) throws GeneralSecurityException, IOException {
+		return value(tids, rawCookieValue, maxAge);
+	}
+
+	public String encode(String value) throws IOException, GeneralSecurityException {
+		return encode(current, value.getBytes(StandardCharsets.UTF_8), Instant.now());
+	}
+
+	public String encode(byte [] value) throws IOException, GeneralSecurityException {
+		return encode(current, value, Instant.now());
+	}
+
+	private static Optional<byte[]> value(Map<String, Tid> tids, String value, Duration maxAge) throws GeneralSecurityException, IOException {
+		String[] split = value.split("\\|");
 		if (split.length != 5)
 			return Optional.empty();
 
@@ -64,46 +70,10 @@ public class SecureCookies {
 
 		byte[] data = decode(eData);
 		byte[] iv = decode(eIv);
-		return Optional.of(new String(tid.compression.uncompress(tid.encryption.decode(data, iv)), StandardCharsets.UTF_8));
+		return Optional.of(tid.compression.uncompress(tid.encryption.decode(data, iv)));
 	}
 
-	public void setCookie(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String name,
-		String value,
-		int expiresInSeconds
-	) {
-		setCookie(request, response, name, value.getBytes(StandardCharsets.UTF_8), expiresInSeconds);
-	}
-
-	private void setCookie(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String name,
-		byte[] data,
-		int expiresInSeconds
-	) {
-		try {
-			Cookies.setCookie(response,
-				Cookies.cookie(
-					System.currentTimeMillis(),
-					name,
-					request.getContextPath(),
-					payload(current, data, Instant.now()),
-					expiresInSeconds
-				)
-			);
-		} catch (IOException | GeneralSecurityException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void removeCookie(HttpServletRequest request, HttpServletResponse response, String name) {
-		Cookies.setCookie(response, Cookies.removeCookie(name, request.getContextPath()));
-	}
-
-	private String payload(Tid tid, byte[] data, Instant atime) throws IOException, GeneralSecurityException {
+	private static String encode(Tid tid, byte[] data, Instant atime) throws IOException, GeneralSecurityException {
 		DataEncryption.Encoding encode = tid.encryption.encode(tid.compression.compress(data));
 		String message = box(
 			base64(encode.data),

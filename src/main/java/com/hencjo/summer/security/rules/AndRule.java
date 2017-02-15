@@ -25,7 +25,7 @@ public final class AndRule implements Rule {
 	}
 
 	@Override
-	public boolean matches(HttpServletRequest request) {
+	public boolean matches(HttpServletRequest request) throws Exception {
 		return left.matches(request) && right.matches(request);
 	}
 	

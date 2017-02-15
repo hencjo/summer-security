@@ -24,7 +24,7 @@ public final class WhenRule implements Rule {
 	}
 
 	@Override
-	public boolean matches(HttpServletRequest request) {
+	public boolean matches(HttpServletRequest request) throws Exception {
 		return requestMatcher.matches(request);
 	}
 	

@@ -66,7 +66,7 @@ public final class FormBasedLogin {
 	public Responder performLoginRequest() {
 		return new Responder() {
 			@Override
-			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws Exception {
 				Optional<Credentials> credentialsOptional = credentials(request);
 
 				if (!credentialsOptional.isPresent()) {
@@ -107,7 +107,7 @@ public final class FormBasedLogin {
 	public Responder performLogoutRequest() {
 		return new Responder() {
 			@Override
-			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws Exception {
 				summerLogger.info("FormBasedLogin. Logout");
 				sessionWriter.stopSession(request, response);
 				loggedOut.respond(request, response);

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class ServerSideSessionTest {
 	@Test
-	public void testSessionWriterStopSessionRemovesJSESSIONCookie() {
+	public void testSessionWriterStopSessionRemovesJSESSIONCookie() throws Exception {
 		givenCookiesAssertThatJSESSIONCookieIsRemoved(new Cookie[] {
 					cookie("JSESSIONID", "/", null)
 				}, new String[] { 
@@ -18,7 +18,7 @@ public class ServerSideSessionTest {
 	}
 	
 	@Test
-	public void forOtherPathsThanSlash() {
+	public void forOtherPathsThanSlash() throws Exception {
 		givenCookiesAssertThatJSESSIONCookieIsRemoved(new Cookie[] {
 				cookie("JSESSIONID", "/path/", null)
 			}, new String[] { 
@@ -33,7 +33,7 @@ public class ServerSideSessionTest {
 	}
 	
 	@Test
-	public void ifMoreThanOneJSESSIONCookieBothShouldBeRemoved() {
+	public void ifMoreThanOneJSESSIONCookieBothShouldBeRemoved() throws Exception {
 		givenCookiesAssertThatJSESSIONCookieIsRemoved(new Cookie[] {
 				cookie("JSESSIONID", "/", null), 
 				cookie("JSESSIONID", "/two", null)
@@ -44,7 +44,7 @@ public class ServerSideSessionTest {
 	}
 	
 	@Test
-	public void onlyJSESSIONIDShouldBeRemoved() {
+	public void onlyJSESSIONIDShouldBeRemoved() throws Exception {
 		givenCookiesAssertThatJSESSIONCookieIsRemoved(new Cookie[] {
 				cookie("JSESSIONID", "/two", null), 
 				cookie("ANOTHER", "/two", null)
@@ -53,7 +53,7 @@ public class ServerSideSessionTest {
 			});
 	}
 
-	private static void givenCookiesAssertThatJSESSIONCookieIsRemoved(Cookie[] cookies, String[] expected) {
+	private static void givenCookiesAssertThatJSESSIONCookieIsRemoved(Cookie[] cookies, String[] expected) throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		HttpSession session = mock(HttpSession.class);

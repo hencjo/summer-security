@@ -4,5 +4,5 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface Rule {
 	String describer();
-	boolean matches(HttpServletRequest request);
+	boolean matches(HttpServletRequest request) throws Exception;
 }

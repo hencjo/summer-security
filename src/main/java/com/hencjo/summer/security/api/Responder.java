@@ -7,6 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 public interface Responder {
 	enum ContinueOrRespond { RESPOND, CONTINUE; }
 
-	ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws IOException;
+	ContinueOrRespond respond(HttpServletRequest request, HttpServletResponse response) throws Exception;
 	String describer();
 }
