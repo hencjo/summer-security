@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -89,11 +90,11 @@ public final class ClientSideSession {
 	private static void setCookie(HttpServletRequest request, HttpServletResponse response, String name, int expiresInSeconds, String payload) {
 		Cookies.setCookie(response,
 			Cookies.cookie(
-				System.currentTimeMillis(),
+				Instant.now(),
 				name,
 				request.getContextPath(),
 				payload,
-				expiresInSeconds
+				Duration.of(expiresInSeconds, ChronoUnit.SECONDS)
 			)
 		);
 	}

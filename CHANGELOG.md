@@ -15,3 +15,4 @@
 * Bundled Base64 Encoder/Decoder removed in favor of Java 8's.
 * Budled Charsets removed in favor of Java 8's StandardCharsets.
 * Optionality is expressed with Java8's Optional instead of null.
+* Using Java 8 Date/Time API in Cookies-utility.  

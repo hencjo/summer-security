@@ -1,28 +1,26 @@
 package com.hencjo.summer.security;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Cookies {
-	private static final ThreadLocal<SimpleDateFormat> HTTP_DATE = new ThreadLocal<SimpleDateFormat>() {
-		@Override
-		protected SimpleDateFormat initialValue() {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss zzz", Locale.US);
-			simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-			return simpleDateFormat;
-		};
-	};
-	
-	public static String cookie(long time, String name, String path, String contents, int expiresInSeconds) {
-		Date date = new Date(time + (expiresInSeconds * 1000));
+	private static final DateTimeFormatter HTTP_DATE = DateTimeFormatter.ofPattern("EEE, dd-MMM-yyyy HH:mm:ss zzz")
+		.withLocale(Locale.US)
+		.withZone(ZoneId.of("GMT"));
+
+	public static String cookie(Instant now, String name, String path, String contents, Duration expiration) {
+		Instant expiry = now.plus(expiration);
 		return new StringBuilder()
 			.append(name).append("=")
 			.append(contents)
-			.append(";Expires=").append(HTTP_DATE.get().format(date))
+			.append(";Expires=").append(HTTP_DATE.format(expiry))
 			.append(";Path=").append(path)
 			.toString();
 	}
@@ -36,7 +34,9 @@ public final class Cookies {
 
 	public static String removeCookie(String name, String path) {
 		return new StringBuilder()
-			.append(name).append("=deleted;Expires=Thu, 01-Jan-1970 00:00:00 GMT")
+			.append(name)
+			.append("=deleted")
+			.append(";Expires=").append(HTTP_DATE.format(Instant.EPOCH))
 			.append(";Path=").append(path)
 			.toString();
 	}
