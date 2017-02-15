@@ -4,8 +4,6 @@ import com.hencjo.summer.security.api.Compression;
 import com.hencjo.summer.security.api.DataEncryption;
 import com.hencjo.summer.security.api.Hmac;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
