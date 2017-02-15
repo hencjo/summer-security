@@ -26,7 +26,7 @@ public final class HttpBasicAuthenticator {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return hasAuthentication(request) != null;
+				return hasAuthentication(request).isPresent();
 			}
 			
 			@Override
@@ -36,12 +36,10 @@ public final class HttpBasicAuthenticator {
 		};
 	}
 
-	public String hasAuthentication(HttpServletRequest request) {
-		Credentials credentials = credentials(request).orElse(null);
-		if (credentials == null) return null;
-
-		Optional<String> authenticate = authenticator.authenticate(credentials);
-		return authenticate.orElse(null);
+	public Optional<String> hasAuthentication(HttpServletRequest request) {
+		Optional<Credentials> credentials = credentials(request);
+		if (!credentials.isPresent()) return Optional.empty();
+		return authenticator.authenticate(credentials.get());
 	}
 
 	public static Optional<Credentials> credentials(HttpServletRequest request) {
