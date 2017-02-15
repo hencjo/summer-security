@@ -10,19 +10,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class Cookies {
+final class Cookies {
 	private static final DateTimeFormatter HTTP_DATE = DateTimeFormatter.ofPattern("EEE, dd-MMM-yyyy HH:mm:ss zzz")
 		.withLocale(Locale.US)
 		.withZone(ZoneId.of("GMT"));
 
 	public static String cookie(Instant now, String name, String path, String contents, Duration expiration) {
 		Instant expiry = now.plus(expiration);
-		return new StringBuilder()
-			.append(name).append("=")
-			.append(contents)
-			.append(";Expires=").append(HTTP_DATE.format(expiry))
-			.append(";Path=").append(path)
-			.toString();
+		return name + "=" +
+			contents +
+			";Expires=" + HTTP_DATE.format(expiry) +
+			";Path=" + path;
 	}
 
 	public static List<Cookie> withName(HttpServletRequest request, String cookieName) {
@@ -33,23 +31,13 @@ public final class Cookies {
 	}
 
 	public static String removeCookie(String name, String path) {
-		return new StringBuilder()
-			.append(name)
-			.append("=deleted")
-			.append(";Expires=").append(HTTP_DATE.format(Instant.EPOCH))
-			.append(";Path=").append(path)
-			.toString();
+		return name +
+			"=deleted" +
+			";Expires=" + HTTP_DATE.format(Instant.EPOCH) +
+			";Path=" + path;
 	}
 
-	public static List<Cookie> withName(Cookie[] cookies, String cookieName) {
-		List<Cookie> matches = new ArrayList<>();
-		for (Cookie cookie : cookies) {
-			if (cookieName.equals(cookie.getName())) matches.add(cookie);
-		}
-		return matches;
-	}
-
-	public static List<Cookie> cookies(HttpServletRequest request) {
+	private static List<Cookie> cookies(HttpServletRequest request) {
 		if (request.getCookies() == null) return Collections.emptyList();
 		return Arrays.asList(request.getCookies());
 	}

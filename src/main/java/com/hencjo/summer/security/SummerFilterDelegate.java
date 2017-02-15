@@ -1,14 +1,13 @@
 package com.hencjo.summer.security;
 
-import java.io.IOException;
+import com.hencjo.summer.security.api.Responder;
+import com.hencjo.summer.security.api.SummerLogger;
+
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.hencjo.summer.security.api.Responder;
-import com.hencjo.summer.security.api.SummerLogger;
 
 public final class SummerFilterDelegate {
 	private final SummerLogger logger;
@@ -44,8 +43,6 @@ public final class SummerFilterDelegate {
 	}
 
 	private static String pretty(HttpServletRequest req) {
-		return new StringBuilder()
-			.append(req.getMethod().toUpperCase()).append(" ").append(req.getRequestURI())
-			.toString();
+		return req.getMethod().toUpperCase() + " " + req.getRequestURI();
 	}
 }

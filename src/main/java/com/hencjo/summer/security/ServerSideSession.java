@@ -49,7 +49,7 @@ public final class ServerSideSession<T> {
 			@Override
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
 				request.getSession(true).invalidate();
-				for (Cookie cookie : Cookies.withName(request.getCookies(), "JSESSIONID"))
+				for (Cookie cookie : Cookies.withName(request, "JSESSIONID"))
 					Cookies.setCookie(response, Cookies.removeCookie(cookie.getName(), cookie.getPath()));
 			}
 		};
