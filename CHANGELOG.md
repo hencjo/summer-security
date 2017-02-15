@@ -3,6 +3,9 @@
 ## Breaking Changes
 * Authenticator is deprecated in favor of CredentialsAuthenticator.
   Use: authenticator.asAuthenticator2(x -> x) as an adapter.
+* ServerSideSession's constructor has been parameterised.
+  Instead of calling new ServerSideSession("attribute")
+  Use: ServerSideSession.adapter("attribute") as an adapter.
 * Requires Java 8.
 * SummerAuthenticatedUser is removed.
     Summer Security 1.2 provides a set of functions from HttpServletRequest -> Credentials and Credentials -> String (Username).
@@ -10,9 +13,10 @@
 
 ## New features
 * Client-Side Sessions adhering to RFC6896.
+* UserId/String is parameterisable. Use your own types!
 
 ## Other changes
 * Bundled Base64 Encoder/Decoder removed in favor of Java 8's.
 * Budled Charsets removed in favor of Java 8's StandardCharsets.
 * Optionality is expressed with Java8's Optional instead of null.
-* Using Java 8 Date/Time API in Cookies-utility.  
+* Using Java 8 Date/Time API in Cookies-utility.

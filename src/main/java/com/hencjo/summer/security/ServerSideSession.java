@@ -13,6 +13,10 @@ public final class ServerSideSession<T> {
 	private final String sessionAttribute;
 	private final AttributeEncoding<T> attributeEncoding;
 
+	public static ServerSideSession<StringBuilder> adapter(String sessionAttribute) {
+		return new ServerSideSession(sessionAttribute, Attributes.StringAttribute);
+	}
+
 	public ServerSideSession(String sessionAttribute, AttributeEncoding<T> attributeEncoding) {
 		this.sessionAttribute = sessionAttribute;
 		this.attributeEncoding = attributeEncoding;
