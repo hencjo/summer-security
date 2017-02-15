@@ -59,8 +59,9 @@ public class ServerSideSessionTest {
 		HttpSession session = mock(HttpSession.class);
 		when(request.getCookies()).thenReturn(cookies);
 		when(request.getSession(true)).thenReturn(session);
-		
-		ServerSideSession sss = new ServerSideSession("attribute");
+
+
+		ServerSideSession<String> sss = new ServerSideSession<>("attribute", Attributes.StringAttribute);
 		sss.sessionWriter().stopSession(request, response);
 		
 		verify(session, times(1)).invalidate();

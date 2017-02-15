@@ -1,12 +1,13 @@
 package com.hencjo.summer.security.api;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 @Deprecated
 public interface Authenticator {
 	boolean authenticate(String username, String password);
 
-	default CredentialsAuthenticator asAuthenticator2() {
-		return c -> authenticate(c.username, c.password) ? Optional.of(c.username) : Optional.empty();
+	default <T> CredentialsAuthenticator<T> asAuthenticator2(Function<String, T> ft) {
+		return c -> authenticate(c.username, c.password) ? Optional.of(ft.apply(c.username)) : Optional.empty();
 	}
 }

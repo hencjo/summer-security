@@ -2,8 +2,8 @@ package com.hencjo.summer.security.api;
 
 import java.util.Optional;
 
-public interface CredentialsAuthenticator {
-	Optional<String> authenticate(Credentials credentials);
+public interface CredentialsAuthenticator<T> {
+	Optional<T> authenticate(Credentials credentials);
 
 	final class Credentials {
 		public final String username;

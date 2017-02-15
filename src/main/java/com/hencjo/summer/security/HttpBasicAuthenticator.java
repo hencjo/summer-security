@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-public final class HttpBasicAuthenticator {
-	private final CredentialsAuthenticator authenticator;
+public final class HttpBasicAuthenticator<T> {
+	private final CredentialsAuthenticator<T> authenticator;
 	private final String realm;
 
-	public HttpBasicAuthenticator(CredentialsAuthenticator authenticator, String realm) {
+	public HttpBasicAuthenticator(CredentialsAuthenticator<T> authenticator, String realm) {
 		if (realm == null) throw new IllegalArgumentException("Realm may not be null.");
 		if (realm.contains("\"")) throw new IllegalArgumentException("Realm may not contain quotes (\")");
 		this.authenticator = authenticator;
@@ -36,7 +36,7 @@ public final class HttpBasicAuthenticator {
 		};
 	}
 
-	public Optional<String> hasAuthentication(HttpServletRequest request) {
+	public Optional<T> hasAuthentication(HttpServletRequest request) {
 		Optional<Credentials> credentials = credentials(request);
 		if (!credentials.isPresent()) return Optional.empty();
 		return authenticator.authenticate(credentials.get());

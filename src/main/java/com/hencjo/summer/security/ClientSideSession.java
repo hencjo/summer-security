@@ -1,5 +1,6 @@
 package com.hencjo.summer.security;
 
+import com.hencjo.summer.security.api.AttributeEncoding;
 import com.hencjo.summer.security.api.RequestMatcher;
 import com.hencjo.summer.security.api.Responder;
 
@@ -13,19 +14,22 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public final class ClientSideSession {
+public final class ClientSideSession<T> {
 	private final String cookieName;
 	private final int expiresInSeconds;
 	private final SecureCookies secureCookies;
+	private final AttributeEncoding<T> attributeEncoding;
 
 	public ClientSideSession(
 		String cookieName,
 		int expiresInSeconds,
-		SecureCookies secureCookies
+		SecureCookies secureCookies,
+		AttributeEncoding<T> attributeEncoding
 	) {
 		this.cookieName = cookieName;
 		this.expiresInSeconds = expiresInSeconds;
 		this.secureCookies = secureCookies;
+		this.attributeEncoding = attributeEncoding;
 	}
 
 	public Responder renewAndAllow() {
@@ -35,14 +39,14 @@ public final class ClientSideSession {
 				HttpServletRequest request,
 				HttpServletResponse response
 			) throws Exception {
-				Optional<String> s = sessionData(request);
+				Optional<T> s = sessionData(request);
 				if (!s.isPresent()) {
 					System.err.println("Entered ClientSideSession.renewAndAllow() when there was no sessionData. That should've been checked before renewing.");
 					response.sendError(401);
 					return ContinueOrRespond.RESPOND;
 				}
 
-				setCookie(request, response, cookieName, expiresInSeconds, secureCookies.encode(s.get()));
+				setCookie(request, response, cookieName, expiresInSeconds, secureCookies.encode(attributeEncoding.toBytes(s.get())));
 				return ContinueOrRespond.CONTINUE;
 			}
 
@@ -53,9 +57,9 @@ public final class ClientSideSession {
 		};
 	}
 
-	public Optional<String> sessionData(HttpServletRequest request) throws GeneralSecurityException, IOException {
+	public Optional<T> sessionData(HttpServletRequest request) throws GeneralSecurityException, IOException {
 		for (Cookie c : Cookies.withName(request, cookieName))
-			return secureCookies.decodeAsString(c.getValue(), Duration.of(expiresInSeconds, ChronoUnit.SECONDS));
+			return secureCookies.decode(c.getValue(), Duration.of(expiresInSeconds, ChronoUnit.SECONDS)).map(attributeEncoding::fromBytes);
 		return Optional.empty();
 	}
 
@@ -73,11 +77,11 @@ public final class ClientSideSession {
 		};
 	}
 
-	public SessionWriter sessionWriter() {
-		return new SessionWriter() {
+	public SessionWriter<T> sessionWriter() {
+		return new SessionWriter<T>() {
 			@Override
-			public void startSession(HttpServletRequest request, HttpServletResponse response, String username) throws Exception {
-				setCookie(request, response, cookieName, expiresInSeconds, secureCookies.encode(username));
+			public void startSession(HttpServletRequest request, HttpServletResponse response, T t) throws Exception {
+				setCookie(request, response, cookieName, expiresInSeconds, secureCookies.encode(attributeEncoding.toBytes(t)));
 			}
 			
 			@Override

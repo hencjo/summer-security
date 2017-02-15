@@ -2,7 +2,7 @@
 
 ## Breaking Changes
 * Authenticator is deprecated in favor of CredentialsAuthenticator.
-  Use: authenticator.asAuthenticator2() as an adapter.
+  Use: authenticator.asAuthenticator2(x -> x) as an adapter.
 * Requires Java 8.
 * SummerAuthenticatedUser is removed.
     Summer Security 1.2 provides a set of functions from HttpServletRequest -> Credentials and Credentials -> String (Username).
