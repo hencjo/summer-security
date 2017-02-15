@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.hencjo.summer.security.api.RequestMatcher;
 
+import java.util.Optional;
+
 public final class ServerSideSession {
 	private final String sessionAttribute;
 	private final Cookies cookies = new Cookies();
@@ -13,18 +15,18 @@ public final class ServerSideSession {
 		this.sessionAttribute = sessionAttribute;
 	}
 
-	public String sessionData(HttpServletRequest request) {
-		if (request.getSession(false) == null) return null;
+	public Optional<String> sessionData(HttpServletRequest request) {
+		if (request.getSession(false) == null) return Optional.empty();
 		Object attribute = request.getSession(false).getAttribute(sessionAttribute);
-		if (attribute == null || !(attribute instanceof String)) return null;
-		return (String) attribute;
+		if (attribute == null || !(attribute instanceof String)) return Optional.empty();
+		return Optional.of((String) attribute);
 	}
 
 	public RequestMatcher exists() {
 		return new RequestMatcher() {
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				return sessionData(request) != null;
+				return sessionData(request).isPresent();
 			}
 
 			@Override
@@ -45,7 +47,7 @@ public final class ServerSideSession {
 			public void stopSession(HttpServletRequest request, HttpServletResponse response) {
 				request.getSession(true).invalidate();
 				for (Cookie cookie : cookies.withName(request.getCookies(), "JSESSIONID"))
-					Cookies.setCookie(response, ServerSideSession.this.cookies.removeCookie(cookie.getName(), cookie.getPath()));
+					Cookies.setCookie(response, cookies.removeCookie(cookie.getName(), cookie.getPath()));
 			}
 		};
 	}
