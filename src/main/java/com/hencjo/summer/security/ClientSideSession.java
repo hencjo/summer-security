@@ -32,6 +32,14 @@ public final class ClientSideSession<T> {
 		this.attributeEncoding = attributeEncoding;
 	}
 
+	public static ClientSideSession withStringAttribute(
+		String cookieName,
+		int expiresInSeconds,
+		SecureCookies secureCookies
+	) {
+		return new ClientSideSession(cookieName, expiresInSeconds, secureCookies, Attributes.StringAttribute);
+	}
+
 	public Responder renewAndAllow() {
 		return new Responder() {
 			@Override
