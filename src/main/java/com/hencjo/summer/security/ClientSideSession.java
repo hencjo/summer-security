@@ -86,13 +86,7 @@ public final class ClientSideSession {
 		};
 	}
 
-	private static void setCookie(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String name,
-		int expiresInSeconds,
-		String payload
-	) {
+	private static void setCookie(HttpServletRequest request, HttpServletResponse response, String name, int expiresInSeconds, String payload) {
 		Cookies.setCookie(response,
 			Cookies.cookie(
 				System.currentTimeMillis(),
