@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,12 +26,12 @@ public class SecureCookies {
 		this.tids = Collections.unmodifiableMap(tids);
 	}
 
-	public Optional<String> decodeAsString(String rawCookieValue, Duration maxAge) throws GeneralSecurityException, IOException {
-		return value(tids, rawCookieValue, maxAge).map(x -> new String(x, StandardCharsets.UTF_8));
+	public Optional<String> decodeAsString(String rawCookieValue, long maxAgeSeconds) throws GeneralSecurityException, IOException {
+		return value(tids, rawCookieValue, maxAgeSeconds).map(x -> new String(x, StandardCharsets.UTF_8));
 	}
 
-	public Optional<byte[]> decode(String rawCookieValue, Duration maxAge) throws GeneralSecurityException, IOException {
-		return value(tids, rawCookieValue, maxAge);
+	public Optional<byte[]> decode(String rawCookieValue, int maxAgeSeconds) throws GeneralSecurityException, IOException {
+		return value(tids, rawCookieValue, maxAgeSeconds);
 	}
 
 	public String encode(String value) throws IOException, GeneralSecurityException {
@@ -43,7 +42,7 @@ public class SecureCookies {
 		return encode(current, value, Instant.now());
 	}
 
-	private static Optional<byte[]> value(Map<String, Tid> tids, String value, Duration maxAge) throws GeneralSecurityException, IOException {
+	private static Optional<byte[]> value(Map<String, Tid> tids, String value, long maxAgeSeconds) throws GeneralSecurityException, IOException {
 		String[] split = value.split("\\|");
 		if (split.length != 5)
 			return Optional.empty();
@@ -63,7 +62,7 @@ public class SecureCookies {
 
 		Instant atime = Instant.ofEpochSecond(new BigInteger(new String(decode(eAtime), StandardCharsets.UTF_8), 16).longValue());
 
-		if (atime.plus(maxAge).isBefore(Instant.now()))
+		if (atime.plusSeconds(maxAgeSeconds).isBefore(Instant.now()))
 			return Optional.empty();
 
 		byte[] data = decode(eData);

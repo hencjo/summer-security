@@ -9,12 +9,11 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class SecureCookiesTest {
 	private final Tid tidV1 = new Tid("v1", new IdEncryption(), new IdHmac(), new NoCompression());
@@ -33,24 +32,24 @@ public class SecureCookiesTest {
 	@Test
 	public void encodeDecodeString() throws Exception {
 		String data = "meow";
-		assertEquals(data, cutV2.decodeAsString(cutV2.encode(data), Duration.of(1, ChronoUnit.HOURS)).get());
+		assertEquals(data, cutV2.decodeAsString(cutV2.encode(data), 3600).get());
 	}
 
 	@Test
 	public void encodeDecodeBytes() throws Exception {
 		byte[] data = "meow".getBytes(StandardCharsets.UTF_8);
-		assertArrayEquals(data, cutV2.decode(cutV2.encode(data), Duration.of(1, ChronoUnit.HOURS)).get());
+		assertArrayEquals(data, cutV2.decode(cutV2.encode(data), 3600).get());
 	}
 
 	@Test
 	public void expiry() throws Exception {
-		assertEquals(Optional.empty(), cutV2.decodeAsString(cutV2.encode(""), Duration.of(-1, ChronoUnit.HOURS)));
+		assertEquals(Optional.empty(), cutV2.decodeAsString(cutV2.encode(""), -3600));
 	}
 
 	@Test
 	public void testDecodeUsingOldTid() throws GeneralSecurityException, IOException {
 		String v1 = cutV1.encode("meow");
-		assertEquals("meow", cutV2.decodeAsString(v1, Duration.of(1, ChronoUnit.HOURS)).get());
+		assertEquals("meow", cutV2.decodeAsString(v1, 3600).get());
 	}
 
 	private static final class IdEncryption implements DataEncryption {

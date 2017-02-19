@@ -9,9 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public final class ClientSideSession<T> {
@@ -67,7 +65,7 @@ public final class ClientSideSession<T> {
 
 	public Optional<T> sessionData(HttpServletRequest request) throws GeneralSecurityException, IOException {
 		for (Cookie c : Cookies.withName(request, cookieName))
-			return secureCookies.decode(c.getValue(), Duration.of(expiresInSeconds, ChronoUnit.SECONDS)).map(attributeEncoding::fromBytes);
+			return secureCookies.decode(c.getValue(), expiresInSeconds).map(attributeEncoding::fromBytes);
 		return Optional.empty();
 	}
 
@@ -106,7 +104,7 @@ public final class ClientSideSession<T> {
 				name,
 				request.getContextPath(),
 				payload,
-				Duration.of(expiresInSeconds, ChronoUnit.SECONDS)
+				expiresInSeconds
 			)
 		);
 	}

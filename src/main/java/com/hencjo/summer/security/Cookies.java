@@ -3,23 +3,25 @@ package com.hencjo.summer.security;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 final class Cookies {
+	private static final ZoneId GMT = ZoneId.of("GMT");
 	private static final DateTimeFormatter HTTP_DATE = DateTimeFormatter.ofPattern("EEE, dd-MMM-yyyy HH:mm:ss zzz")
 		.withLocale(Locale.US)
-		.withZone(ZoneId.of("GMT"));
+		.withZone(GMT);
 
-	public static String cookie(Instant now, String name, String path, String contents, Duration expiration) {
-		Instant expiry = now.plus(expiration);
+	public static String cookie(Instant now, String name, String path, String contents, long expirationSeconds) {
 		return name + "=" +
 			contents +
-			";Expires=" + HTTP_DATE.format(expiry) +
+			";Expires=" + HTTP_DATE.format(now.plusSeconds(expirationSeconds)) +
 			";Path=" + path;
 	}
 
