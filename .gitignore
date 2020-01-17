@@ -6,6 +6,9 @@
 #Maven
 target
 
+#Gradle
+build/
+
 #IntelliJ
 .idea
 *.iml
